@@ -1,0 +1,20 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "generateOptions": {
+    "spec": false
+  },
+  "compilerOptions": {
+    "plugins": [
+      "@nestjs/swagger"
+    ],
+    "assets": [
+      {
+        "include": "mail/templates/**/*",
+        "outDir": "dist",
+        "watchAssets": true
+      }
+    ],
+    "watchAssets": false
+  }
+}
