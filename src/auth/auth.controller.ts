@@ -1,34 +1,45 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Request, ParseIntPipe } from '@nestjs/common';
+import { Request as ERequest } from 'express';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { LoginDto } from './dto/login.dto';
+import { UpdateUserDto } from 'src/user/dto/update-user.dto';
+import { CreateOrganizationDto } from 'src/organization/dto/create-organization.dto';
+import { ApiHeader } from '@nestjs/swagger';
 
+@ApiHeader({
+  name: 'x-organization-slug',
+  description: 'Custom header',
+})
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Post('verify-email')
+  verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.authService.verifyEmail(dto);
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post('validate-otp')
+  validateOTP(@Body('otp', ParseIntPipe) otp: number) {
+    return this.authService.validateOTP(otp);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @Post('update-personal-details')
+  updatePersonalDetails(@Request() req: ERequest, @Body() dto: UpdateUserDto) {
+    return this.authService.updatePersonalDetails((req as any).tokenData, dto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
+  @Post('create-organization')
+  createOrganization(
+    @Request() req: ERequest,
+    @Body() dto: CreateOrganizationDto,
+  ) {
+    return this.authService.createOrganization((req as any).tokenData, dto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @Post(':id')
+  login(@Request() req: ERequest, @Body() dto: LoginDto) {
+    return this.authService.login((req as any).tokenData.organizationId, dto);
   }
 }
