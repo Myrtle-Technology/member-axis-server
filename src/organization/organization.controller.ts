@@ -9,10 +9,19 @@ import {
   CrudRequest,
   ParsedBody,
   CreateManyDto,
+  Crud,
 } from '@rewiko/crud';
 import { Organization } from './entities';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-@Controller('organization')
+@ApiBearerAuth()
+@ApiTags('organizations')
+@Crud({
+  model: {
+    type: Organization,
+  },
+})
+@Controller('organizations')
 export class OrganizationController implements CrudController<Organization> {
   constructor(public service: OrganizationService) {}
 
