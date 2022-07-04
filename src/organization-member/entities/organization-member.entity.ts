@@ -7,7 +7,7 @@ import {
   BaseEntity,
 } from 'typeorm';
 import { IsNotEmpty, IsOptional, IsPhoneNumber } from 'class-validator';
-import { User } from 'src/users/entities';
+import { User } from 'src/user/entities';
 import { Role } from 'src/role/entities';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';

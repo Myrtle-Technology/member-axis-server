@@ -1,34 +1,69 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { OrganizationService } from './organization.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import {
+  CrudController,
+  Override,
+  ParsedRequest,
+  CrudRequest,
+  ParsedBody,
+  CreateManyDto,
+} from '@rewiko/crud';
+import { Organization } from './entities';
 
 @Controller('organization')
-export class OrganizationController {
-  constructor(private readonly organizationService: OrganizationService) {}
+export class OrganizationController implements CrudController<Organization> {
+  constructor(public service: OrganizationService) {}
 
-  @Post()
-  create(@Body() createOrganizationDto: CreateOrganizationDto) {
-    return this.organizationService.create(createOrganizationDto);
+  get base(): CrudController<Organization> {
+    return this;
   }
 
-  @Get()
-  findAll() {
-    return this.organizationService.findAll();
+  @Override()
+  getMany(@ParsedRequest() req: CrudRequest) {
+    return this.base.getManyBase(req);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.organizationService.findOne(+id);
+  @Override()
+  getOne(@ParsedRequest() req: CrudRequest) {
+    return this.base.getOneBase(req);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrganizationDto: UpdateOrganizationDto) {
-    return this.organizationService.update(+id, updateOrganizationDto);
+  @Override()
+  createOne(
+    @ParsedRequest() req: CrudRequest,
+    @ParsedBody() dto: Organization,
+  ): Promise<Organization> {
+    return this.base.createOneBase(req, dto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.organizationService.remove(+id);
+  @Override()
+  createMany(
+    @ParsedRequest() req: CrudRequest,
+    @ParsedBody() dto: CreateManyDto<Organization>,
+  ): Promise<Organization[]> {
+    return this.base.createManyBase(req, dto);
+  }
+
+  @Override()
+  updateOne(
+    @ParsedRequest() req: CrudRequest,
+    @ParsedBody() dto: Organization,
+  ): Promise<Organization> {
+    return this.base.updateOneBase(req, dto);
+  }
+
+  @Override()
+  replaceOne(
+    @ParsedRequest() req: CrudRequest,
+    @ParsedBody() dto: Organization,
+  ): Promise<Organization> {
+    return this.base.replaceOneBase(req, dto);
+  }
+
+  @Override()
+  deleteOne(@ParsedRequest() req: CrudRequest): Promise<void | Organization> {
+    return this.base.deleteOneBase(req);
   }
 }

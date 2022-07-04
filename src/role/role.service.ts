@@ -1,26 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TypeOrmCrudService } from '@rewiko/crud-typeorm';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { Role } from './entities';
 
 @Injectable()
-export class RoleService {
-  create(createRoleDto: CreateRoleDto) {
-    return 'This action adds a new role';
-  }
-
-  findAll() {
-    return `This action returns all role`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} role`;
-  }
-
-  update(id: number, updateRoleDto: UpdateRoleDto) {
-    return `This action updates a #${id} role`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} role`;
+export class RoleService extends TypeOrmCrudService<Role> {
+  logger = new Logger(RoleService.name);
+  constructor(@InjectRepository(Role) repo) {
+    super(repo);
   }
 }

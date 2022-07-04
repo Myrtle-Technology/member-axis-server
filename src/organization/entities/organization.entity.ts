@@ -13,7 +13,7 @@ import {
   IsOptional,
   IsPhoneNumber,
 } from 'class-validator';
-import { User } from 'src/users/entities';
+import { User } from 'src/user/entities';
 import { Role } from 'src/role/entities';
 import { OrganizationMember } from 'src/organization-member/entities';
 

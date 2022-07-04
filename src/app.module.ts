@@ -6,7 +6,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { RoleModule } from './role/role.module';
 import { OrganizationMemberModule } from './organization-member/organization-member.module';
 import { OrganizationModule } from './organization/organization.module';
-import { UsersModule } from './users/users.module';
+import { UsersModule } from './user/user.module';
 import { MailModule } from './mail/mail.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';

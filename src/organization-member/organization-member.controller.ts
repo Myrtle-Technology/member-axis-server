@@ -1,34 +1,82 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { OrganizationMemberService } from './organization-member.service';
 import { CreateOrganizationMemberDto } from './dto/create-organization-member.dto';
 import { UpdateOrganizationMemberDto } from './dto/update-organization-member.dto';
+import { OrganizationMember } from './entities';
+import {
+  CrudController,
+  Override,
+  ParsedRequest,
+  CrudRequest,
+  ParsedBody,
+  CreateManyDto,
+  Crud,
+} from '@rewiko/crud';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-@Controller('organization-member')
-export class OrganizationMemberController {
-  constructor(private readonly organizationMemberService: OrganizationMemberService) {}
+@ApiBearerAuth()
+@ApiTags('members')
+@Crud({
+  model: {
+    type: OrganizationMember,
+  },
+})
+@Controller('members')
+export class OrganizationMemberController
+  implements CrudController<OrganizationMember>
+{
+  constructor(public service: OrganizationMemberService) {}
 
-  @Post()
-  create(@Body() createOrganizationMemberDto: CreateOrganizationMemberDto) {
-    return this.organizationMemberService.create(createOrganizationMemberDto);
+  get base(): CrudController<OrganizationMember> {
+    return this;
   }
 
-  @Get()
-  findAll() {
-    return this.organizationMemberService.findAll();
+  @Override()
+  getMany(@ParsedRequest() req: CrudRequest) {
+    return this.base.getManyBase(req);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.organizationMemberService.findOne(+id);
+  @Override()
+  getOne(@ParsedRequest() req: CrudRequest) {
+    return this.base.getOneBase(req);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrganizationMemberDto: UpdateOrganizationMemberDto) {
-    return this.organizationMemberService.update(+id, updateOrganizationMemberDto);
+  @Override()
+  createOne(
+    @ParsedRequest() req: CrudRequest,
+    @ParsedBody() dto: OrganizationMember,
+  ): Promise<OrganizationMember> {
+    return this.base.createOneBase(req, dto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.organizationMemberService.remove(+id);
+  @Override()
+  createMany(
+    @ParsedRequest() req: CrudRequest,
+    @ParsedBody() dto: CreateManyDto<OrganizationMember>,
+  ): Promise<OrganizationMember[]> {
+    return this.base.createManyBase(req, dto);
+  }
+
+  @Override()
+  updateOne(
+    @ParsedRequest() req: CrudRequest,
+    @ParsedBody() dto: OrganizationMember,
+  ): Promise<OrganizationMember> {
+    return this.base.updateOneBase(req, dto);
+  }
+
+  @Override()
+  replaceOne(
+    @ParsedRequest() req: CrudRequest,
+    @ParsedBody() dto: OrganizationMember,
+  ): Promise<OrganizationMember> {
+    return this.base.replaceOneBase(req, dto);
+  }
+
+  @Override()
+  deleteOne(
+    @ParsedRequest() req: CrudRequest,
+  ): Promise<void | OrganizationMember> {
+    return this.base.deleteOneBase(req);
   }
 }
