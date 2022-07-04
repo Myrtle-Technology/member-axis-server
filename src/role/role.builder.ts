@@ -2,7 +2,7 @@ import { RolesBuilder } from 'nest-access-control';
 import { Resources } from './enums/resources.enum';
 import { RoleService } from './role.service';
 import { GrantDto } from './dto/grant.dto';
-import { Permissions, Role } from './entities';
+import { Permission, Role } from './entities';
 import { Role as RoleEnum } from './enums/role.enum';
 import { ParsedRequestParams } from '@rewiko/crud-request';
 import { PermissionAction } from './enums/permission-action.enum';

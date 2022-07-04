@@ -1,8 +1,11 @@
-import { Column } from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { PermissionAction } from '../enums/permission-action.enum';
 import { Resources } from '../enums/resources.enum';
 
-export class Permissions {
+@Entity()
+export class Permission extends BaseEntity {
+  @PrimaryGeneratedColumn() id: number;
+
   @Column()
   resource: Resources;
 
@@ -12,9 +15,8 @@ export class Permissions {
   @Column({ default: '*' })
   attributes: string; // '*, !rating, !views'
 
-  constructor(resource: Resources, action: PermissionAction, attributes = '*') {
-    this.resource = resource;
-    this.action = action;
-    this.attributes = attributes;
+  constructor(permission?: Partial<Permission>) {
+    super();
+    Object.assign(this, permission);
   }
 }

@@ -1,10 +1,23 @@
-import { Column, Entity, ObjectID, ObjectIdColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 import { IsNotEmpty, IsOptional } from 'class-validator';
-import { Permissions } from './permission.entity';
+import { Permission } from './permission.entity';
+import { Organization } from 'src/organization/entities';
+import { OrganizationMember } from 'src/organization-member/entities';
 
 @Entity()
-export class Role {
-  @ObjectIdColumn() id: ObjectID;
+@Unique('organization_slug_unique', ['organizationId', 'slug'])
+export class Role extends BaseEntity {
+  @PrimaryGeneratedColumn() id: number;
 
   @IsNotEmpty()
   @Column()
@@ -12,18 +25,34 @@ export class Role {
 
   @IsNotEmpty()
   @Column()
+  @Index({ unique: true })
   slug: string;
 
   @IsOptional()
   @Column()
   description: string;
 
-  permissions: Permissions[];
+  permissions: Permission[];
 
   @Column({ nullable: true })
-  organizationId: string; // TODO: add organizationId association to role
+  organizationId: number;
+
+  @ManyToOne(() => Organization, (organization) => organization.roles)
+  @JoinColumn({ name: 'organizationId' })
+  ownerOrganization: Organization;
 
   @Column() createdAt: Date;
 
   @Column() updatedAt: Date;
+
+  @OneToMany(
+    () => OrganizationMember,
+    (organizationMember) => organizationMember.role,
+  )
+  organizationMembers: OrganizationMember[];
+
+  constructor(permission?: Partial<Role>) {
+    super();
+    Object.assign(this, permission);
+  }
 }

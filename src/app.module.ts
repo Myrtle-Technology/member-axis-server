@@ -21,19 +21,18 @@ import configuration from './config/configuration';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        type: 'mongodb',
-        url: configService.get('DATABASE_URL'),
+        type: 'mysql',
+        host: configService.get('DATABASE_HOST'),
+        port: configService.get('DATABASE_PORT'),
+        username: configService.get('DATABASE_USERNAME'),
+        password: configService.get('DATABASE_PASSWORD'),
+        database: configService.get('DATABASE_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         migrations: ['src/migration/*{.ts,.js}'],
         cli: {
           migrationsDir: 'src/migration',
         },
-        logging: false,
-        autoLoadEntities: true,
-        useUnifiedTopology: true,
-        writeConcern: {
-          j: true,
-        },
+        synchronize: true,
       }),
       inject: [ConfigService],
     }),
