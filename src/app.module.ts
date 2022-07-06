@@ -6,11 +6,14 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { RoleModule } from './role/role.module';
 import { OrganizationMemberModule } from './organization-member/organization-member.module';
 import { OrganizationModule } from './organization/organization.module';
-import { UsersModule } from './user/user.module';
+import { UserModule } from './user/user.module';
 import { MailModule } from './mail/mail.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import configuration from './config/configuration';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { RoleService } from './role/role.service';
 
 @Module({
   imports: [
@@ -33,6 +36,7 @@ import configuration from './config/configuration';
           migrationsDir: 'src/migration',
         },
         synchronize: true,
+        logging: true,
       }),
       inject: [ConfigService],
     }),
@@ -44,13 +48,24 @@ import configuration from './config/configuration';
       ignoreErrors: false,
     }),
     MailModule,
-    UsersModule,
+    UserModule,
     OrganizationModule,
     OrganizationMemberModule,
     RoleModule,
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: RolesGuard,
+    // },
+    RoleService,
+  ],
 })
 export class AppModule {}

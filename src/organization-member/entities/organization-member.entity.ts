@@ -5,6 +5,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   BaseEntity,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { IsNotEmpty, IsOptional, IsPhoneNumber } from 'class-validator';
 import { User } from 'src/user/entities';
@@ -23,18 +25,20 @@ export class OrganizationMember extends BaseEntity {
   @Column()
   organizationId: string;
 
-  @ManyToOne(() => Organization, (org) => org.organizationMembers)
+  @ManyToOne(() => Organization, (org) => org.organizationMembers, {
+    eager: true,
+  })
   @JoinColumn({ name: 'organizationId' })
   @ApiProperty({ type: () => Organization })
   organization: Organization;
 
   @Column()
-  memberId: string;
+  userId: string;
 
-  @ManyToOne(() => User, (user) => user.memberOrganizations)
-  @JoinColumn({ name: 'memberId' })
+  @ManyToOne(() => User, (user) => user.memberOrganizations, { eager: true })
+  @JoinColumn({ name: 'userId' })
   @ApiProperty({ type: () => User })
-  member: User;
+  user: User;
 
   @Column()
   roleId: string;
@@ -62,6 +66,10 @@ export class OrganizationMember extends BaseEntity {
 
   @Column({ type: 'json', nullable: true })
   OtherInformation: MetaInformation[];
+
+  @CreateDateColumn() createdAt: Date;
+
+  @UpdateDateColumn() updatedAt: Date;
 
   constructor(permission?: Partial<OrganizationMember>) {
     super();

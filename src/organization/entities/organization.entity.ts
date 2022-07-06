@@ -6,6 +6,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import {
   IsEmail,
@@ -71,10 +73,9 @@ export class Organization {
   @JoinColumn({ name: 'ownerId' })
   roles: Role[];
 
-  @Column()
-  createdAt: Date;
+  @CreateDateColumn() createdAt: Date;
 
-  @Column() updatedAt: Date;
+  @UpdateDateColumn() updatedAt: Date;
 
   @OneToMany(
     () => OrganizationMember,

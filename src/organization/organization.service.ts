@@ -11,4 +11,12 @@ export class OrganizationService extends TypeOrmCrudService<Organization> {
   constructor(@InjectRepository(Organization) repo) {
     super(repo);
   }
+
+  async update(organizationId: number, dto: UpdateOrganizationDto) {
+    return this.repo.update(organizationId, dto);
+  }
+
+  async create(dto: CreateOrganizationDto) {
+    return this.repo.create(dto);
+  }
 }

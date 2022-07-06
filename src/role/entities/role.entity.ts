@@ -1,6 +1,7 @@
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
@@ -8,6 +9,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   Unique,
+  UpdateDateColumn,
 } from 'typeorm';
 import { IsNotEmpty, IsOptional } from 'class-validator';
 import { Permission } from './permission.entity';
@@ -41,9 +43,9 @@ export class Role extends BaseEntity {
   @JoinColumn({ name: 'organizationId' })
   ownerOrganization: Organization;
 
-  @Column() createdAt: Date;
+  @CreateDateColumn() createdAt: Date;
 
-  @Column() updatedAt: Date;
+  @UpdateDateColumn() updatedAt: Date;
 
   @OneToMany(
     () => OrganizationMember,
