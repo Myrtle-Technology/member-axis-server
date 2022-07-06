@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateOrganizationDto } from 'src/organization/dto/create-organization.dto';
+import { BadRequestException, Injectable, Scope, Inject } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
 import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 import { User } from 'src/user/entities';
 import { VerifyEmailDto } from './dto/verify-email.dto';
@@ -14,12 +15,18 @@ import { UserService } from 'src/user/user.service';
 import { OrganizationService } from 'src/organization/organization.service';
 import { FindUserOrganization } from './dto/find-user-organization..dto';
 import { OrganizationMemberService } from 'src/organization-member/organization-member.service';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { CreateOrganizationPasswordDto } from './dto/create-organization-password.dto';
+import { ConfigService } from '@nestjs/config';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class AuthService {
+  private readonly saltRounds = +this.configService.get<number>('SALT_ROUNDS');
   constructor(
+    @Inject(REQUEST) private request: Request,
     private mailService: MailService,
     private jwtService: JwtService,
+    private configService: ConfigService,
     private userService: UserService,
     private organizationService: OrganizationService,
     private organizationMemberService: OrganizationMemberService,
@@ -43,8 +50,9 @@ export class AuthService {
     return user;
   }
 
-  async validateOTP(otp: number) {
-    const token = await Token.findOne({ where: { token: otp.toString() } });
+  async validateOTP(dto: VerifyOtpDto) {
+    const user = await this.userService.getUserByUsername(dto.username);
+    const token = await Token.findOne({ where: { token: dto.otp.toString() } });
     if (!token) {
       throw new BadRequestException(`OTP is invalid`);
     }
@@ -52,7 +60,7 @@ export class AuthService {
     await token.remove();
     // TODO: send Email to user
     const payload = {
-      username: token.user.email,
+      username: user.email,
       userId: token.userId,
     };
     // this access token will be used to access only three routes
@@ -64,15 +72,28 @@ export class AuthService {
     return this.userService.update(userId, dto);
   }
 
-  async createOrganization(userId: number, dto: CreateOrganizationDto) {
+  async createOrganization(userId: number, dto: CreateOrganizationPasswordDto) {
     dto.ownerId = userId;
-    return this.organizationService.create(dto);
+    const organization = await this.organizationService.create(dto);
+    const password = await bcrypt.hash(dto.password, this.saltRounds);
+    return this.organizationMemberService.create({
+      organizationId: organization.id,
+      userId: userId,
+      roleId: 1,
+      password: password,
+    });
   }
 
-  async validateOrganizationMember(organizationId: number, dto: LoginDto) {
+  async validateOrganizationMember(dto: LoginDto) {
     const user: User = await this.userService.getUserByUsername(dto.username);
+    const organizationSlug = this.request.headers[
+      'x-organization-slug'
+    ] as string;
+    const organization = await this.organizationService.getOrganizationBySlug(
+      organizationSlug,
+    );
     const member = await OrganizationMember.findOne({
-      where: { userId: user.id, organizationId },
+      where: { userId: user.id, organizationId: organization.id },
     });
     if (!member) {
       throw new BadRequestException(
@@ -89,12 +110,9 @@ export class AuthService {
     return null;
   }
 
-  async loginToOrganization(organizationId: number, dto: LoginDto) {
+  async loginToOrganization(dto: LoginDto) {
     // this line will not be needed when we have jwt service
-    const organizationMember = await this.validateOrganizationMember(
-      organizationId,
-      dto,
-    );
+    const organizationMember = await this.validateOrganizationMember(dto);
     const payload = {
       username: dto.username,
       organizationMemberId: organizationMember.id,

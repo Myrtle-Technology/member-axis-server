@@ -1,23 +1,23 @@
 import {
+  isString,
   registerDecorator,
   ValidationOptions,
-  isEmail,
-  isPhoneNumber,
 } from 'class-validator';
 
-export function IsUsername(validationOptions?: ValidationOptions) {
+export function IsSlug(validationOptions?: ValidationOptions) {
   return function (object: Record<string, any>, propertyName: string) {
     registerDecorator({
       name: 'IsUserName',
       target: object.constructor,
       propertyName: propertyName,
       options: {
-        message: 'Invalid user name. Please enter an email or a phone number',
+        message:
+          'Invalid site name. Please enter a site name with only letters, numbers, and dashes.',
         ...validationOptions,
       },
       validator: {
         validate(value: any) {
-          return isEmail(value) || isPhoneNumber(value);
+          return isString(value) && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
         },
       },
     });

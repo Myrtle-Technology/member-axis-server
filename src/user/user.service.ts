@@ -19,18 +19,20 @@ export class UserService extends TypeOrmCrudService<User> {
   }
 
   async update(userId: number, dto: UpdateUserDto) {
-    return this.repo.update(userId, dto);
+    delete dto.verified; // verification can only happen via auth verifyOTP route
+    this.repo.update(userId, dto);
+    return this.findOne(userId);
   }
 
   async create(dto: CreateUserDto) {
-    return this.repo.create(dto).save();
+    return this.repo.save(dto);
   }
 
   async getUserByUsername(username: string, throwError = true) {
     let user: User;
     if (isPhoneNumber(username)) {
       user = await this.findOne({
-        where: { phoneNumber: username },
+        where: { phone: username },
       });
     }
     if (isEmail(username)) {
@@ -45,10 +47,15 @@ export class UserService extends TypeOrmCrudService<User> {
   async createUserByUsername(username: string) {
     let user: User;
     if (isPhoneNumber(username)) {
-      user = await this.create({ phoneNumber: username });
+      user = await this.create({ phone: username });
     }
     if (isEmail(username)) {
-      user = await this.create({ firstName: username, email: username });
+      user = await this.create({
+        firstName: null,
+        email: username,
+        lastName: null,
+        phone: null,
+      });
     }
     return user;
   }

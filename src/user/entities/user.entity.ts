@@ -14,11 +14,14 @@ import { OrganizationMember } from 'src/organization-member/entities';
 
 @Entity()
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn() id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column({ nullable: true, default: ' ' }) firstName: string;
+  @Column({ nullable: true })
+  firstName: string;
 
-  @Column({ nullable: true, default: ' ' }) lastName: string;
+  @Column({ nullable: true })
+  lastName: string;
 
   @IsEmail()
   @Column({ nullable: true })

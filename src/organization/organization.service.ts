@@ -12,11 +12,16 @@ export class OrganizationService extends TypeOrmCrudService<Organization> {
     super(repo);
   }
 
+  async getOrganizationBySlug(organizationSlug: string) {
+    return this.repo.findOne({ where: { slug: organizationSlug } });
+  }
+
   async update(organizationId: number, dto: UpdateOrganizationDto) {
-    return this.repo.update(organizationId, dto);
+    this.repo.update(organizationId, dto);
+    return this.repo.findOne(organizationId);
   }
 
   async create(dto: CreateOrganizationDto) {
-    return this.repo.create(dto);
+    return this.repo.save(dto);
   }
 }

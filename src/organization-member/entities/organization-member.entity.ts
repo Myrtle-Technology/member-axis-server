@@ -20,10 +20,10 @@ import { MetaInformation } from '../dto/meta-information.dto';
 @Entity()
 export class OrganizationMember extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Column()
-  organizationId: string;
+  organizationId: number;
 
   @ManyToOne(() => Organization, (org) => org.organizationMembers, {
     eager: true,
@@ -33,7 +33,7 @@ export class OrganizationMember extends BaseEntity {
   organization: Organization;
 
   @Column()
-  userId: string;
+  userId: number;
 
   @ManyToOne(() => User, (user) => user.memberOrganizations, { eager: true })
   @JoinColumn({ name: 'userId' })
@@ -41,7 +41,7 @@ export class OrganizationMember extends BaseEntity {
   user: User;
 
   @Column()
-  roleId: string;
+  roleId: number;
 
   @ManyToOne(() => Role, (role) => role.organizationMembers)
   @JoinColumn({ name: 'roleId' })

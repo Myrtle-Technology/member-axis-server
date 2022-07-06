@@ -1,6 +1,6 @@
-import { IsUserName } from '../decorators/is-username.decorator';
+import { IsUsername } from '../decorators/is-username.decorator';
 
 export class VerifyEmailDto {
-  @IsUserName()
+  @IsUsername()
   username: string;
 }

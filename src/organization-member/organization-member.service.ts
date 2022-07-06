@@ -11,4 +11,8 @@ export class OrganizationMemberService extends TypeOrmCrudService<OrganizationMe
   constructor(@InjectRepository(OrganizationMember) repo) {
     super(repo);
   }
+
+  async create(dto: CreateOrganizationMemberDto) {
+    return this.repo.save(dto);
+  }
 }

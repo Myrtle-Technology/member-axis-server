@@ -1,13 +1,13 @@
 import {
   Column,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  Unique,
 } from 'typeorm';
 import {
   IsEmail,
@@ -20,6 +20,7 @@ import { Role } from 'src/role/entities';
 import { OrganizationMember } from 'src/organization-member/entities';
 
 @Entity()
+@Unique('slug_unique', ['slug'])
 export class Organization {
   @PrimaryGeneratedColumn() id: number;
 
@@ -29,7 +30,6 @@ export class Organization {
 
   @IsNotEmpty()
   @Column()
-  @Index({ unique: true })
   slug: string;
 
   @IsNotEmpty()
