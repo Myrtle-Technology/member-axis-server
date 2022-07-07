@@ -23,14 +23,14 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const contextId = ContextIdFactory.getByRequest(request);
     // "AuthService" is a request-scoped provider
     const authService = await this.moduleRef.resolve(AuthService, contextId);
-    const organizationMember =
-      await this.authService.validateOrganizationMember({
-        username,
-        password,
-      });
+    const organizationMember = await authService.validateOrganizationMember({
+      username,
+      password,
+    });
     if (!organizationMember) {
       throw new UnauthorizedException();
     }
+    (request as any).organizationMember = organizationMember;
     return organizationMember;
   }
 }

@@ -5,6 +5,8 @@ import {
   Entity,
   Index,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -31,9 +33,13 @@ export class Role extends BaseEntity {
   slug: string;
 
   @IsOptional()
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
+  @ManyToMany(() => Permission, (p) => p.roles, {
+    eager: true,
+  })
+  @JoinTable()
   permissions: Permission[];
 
   @Column({ nullable: true })

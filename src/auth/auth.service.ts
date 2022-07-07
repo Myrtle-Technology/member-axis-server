@@ -18,6 +18,8 @@ import { OrganizationMemberService } from 'src/organization-member/organization-
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { CreateOrganizationPasswordDto } from './dto/create-organization-password.dto';
 import { ConfigService } from '@nestjs/config';
+import { ORGANIZATION_API_HEADER } from './decorators/organization-api.decorator';
+import { RoleService } from 'src/role/role.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
@@ -28,6 +30,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private userService: UserService,
+    private roleService: RoleService,
     private organizationService: OrganizationService,
     private organizationMemberService: OrganizationMemberService,
   ) {}
@@ -52,42 +55,55 @@ export class AuthService {
 
   async validateOTP(dto: VerifyOtpDto) {
     const user = await this.userService.getUserByUsername(dto.username);
-    const token = await Token.findOne({ where: { token: dto.otp.toString() } });
+    const token = await Token.findOne({
+      where: { token: dto.otp.toString(), userId: user.id },
+    });
     if (!token) {
       throw new BadRequestException(`OTP is invalid`);
     }
-    await this.userService.update(token.userId, { verified: true });
+    user.verified = true;
+    await user.save();
     await token.remove();
-    // TODO: send Email to user
     const payload = {
       username: user.email,
-      userId: token.userId,
+      userId: user.id,
     };
     // this access token will be used to access only three routes
     // update personal details, create organization, and find User Organizations
-    return { accessToken: this.jwtService.sign(payload), user: token.user };
+    return {
+      accessToken: this.jwtService.sign(payload, { expiresIn: '24h' }),
+      user: token.user,
+    };
   }
 
   async updatePersonalDetails(userId: number, dto: UpdateUserDto) {
+    // TODO: send a welcome Email to user
     return this.userService.update(userId, dto);
   }
 
   async createOrganization(userId: number, dto: CreateOrganizationPasswordDto) {
     dto.ownerId = userId;
+    const user = await this.userService.findOne(userId);
     const organization = await this.organizationService.create(dto);
     const password = await bcrypt.hash(dto.password, this.saltRounds);
-    return this.organizationMemberService.create({
+    const role = await this.roleService.getDefaultAdminRole();
+    const member = await this.organizationMemberService.create({
       organizationId: organization.id,
       userId: userId,
-      roleId: 1,
+      roleId: role.id,
       password: password,
+      officeTitle: dto.officeTitle,
+      contactPhone: user.phone,
     });
+    delete member.password;
+    // TODO: send a welcome Email to user
+    return member;
   }
 
   async validateOrganizationMember(dto: LoginDto) {
     const user: User = await this.userService.getUserByUsername(dto.username);
     const organizationSlug = this.request.headers[
-      'x-organization-slug'
+      ORGANIZATION_API_HEADER
     ] as string;
     const organization = await this.organizationService.getOrganizationBySlug(
       organizationSlug,
@@ -111,8 +127,7 @@ export class AuthService {
   }
 
   async loginToOrganization(dto: LoginDto) {
-    // this line will not be needed when we have jwt service
-    const organizationMember = await this.validateOrganizationMember(dto);
+    const organizationMember = (this.request as any).organizationMember;
     const payload = {
       username: dto.username,
       organizationMemberId: organizationMember.id,

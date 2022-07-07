@@ -53,11 +53,12 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Public()
   @Post('login')
-  login(@Request() req: ERequest, @Body() dto: LoginDto) {
+  login(@Body() dto: LoginDto) {
     return this.authService.loginToOrganization(dto);
   }
 
   @AllowUserWithoutOrganization()
+  @Post('find-organizations')
   findUserOrganizations(
     @Request() req: TokenRequest,
     @Body() dto: FindUserOrganization,

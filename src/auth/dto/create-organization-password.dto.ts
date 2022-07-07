@@ -1,4 +1,4 @@
-import { MinLength, MaxLength } from 'class-validator';
+import { MinLength, MaxLength, IsString } from 'class-validator';
 import { CreateOrganizationDto } from 'src/organization/dto/create-organization.dto';
 import { IsEqualTo } from '../decorators/is-equal-to.decorator';
 
@@ -11,4 +11,7 @@ export class CreateOrganizationPasswordDto extends CreateOrganizationDto {
   @MaxLength(20)
   @IsEqualTo('password')
   confirmPassword: string;
+
+  @IsString()
+  officeTitle: string;
 }

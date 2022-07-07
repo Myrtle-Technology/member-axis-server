@@ -10,6 +10,7 @@ import { jwtConstants } from './constants';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { RoleModule } from 'src/role/role.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { LocalStrategy } from './strategies/local.strategy';
     }),
     PassportModule.register({ defaultStrategy: 'Bearer' }),
     UserModule,
+    RoleModule,
     OrganizationModule,
     OrganizationMemberModule,
   ],

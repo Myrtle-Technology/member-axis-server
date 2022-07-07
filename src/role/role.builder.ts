@@ -4,7 +4,6 @@ import { RoleService } from './role.service';
 import { GrantDto } from './dto/grant.dto';
 import { Permission, Role } from './entities';
 import { Role as RoleEnum } from './enums/role.enum';
-import { ParsedRequestParams } from '@rewiko/crud-request';
 import { PermissionAction } from './enums/permission-action.enum';
 
 // TODO: add roles to the database
@@ -13,34 +12,38 @@ export const rolesBuilder: RolesBuilder = new RolesBuilder();
 export async function RolesBuilderFactory(
   roleService: RoleService,
 ): Promise<RolesBuilder> {
-  /*
   const hashMapOfGrants = rolesBuilder.getGrants();
-  let roles = await roleService.findAll();
+  let roles = await roleService.find();
   if (roles.length === 0) {
-    roles = await roleService.create(
-      Object.keys(hashMapOfGrants).map((role) => ({
-        name: role,
-        slug: role,
-        permissions: Object.keys(hashMapOfGrants[role])
-          .map((resource: Resources) => {
-            if ((resource as string) == '$extend') return [];
-            return Object.keys(hashMapOfGrants[role][resource]).map(
-              (grant: PermissionAction) =>
-                new Permissions(
-                  resource,
-                  grant,
-                  hashMapOfGrants[role][resource][grant],
-                ),
-            );
-          })
-          .reduce((acc, val) => acc.concat(val), []),
-      })) as Role[],
-    );
+    const _roles = Object.keys(hashMapOfGrants).map((role) => {
+      const _permissions = Object.keys(hashMapOfGrants[role])
+        .map((resource: Resources) => {
+          if ((resource as string) == '$extend') return [];
+          return Object.keys(hashMapOfGrants[role][resource]).map(
+            (grant: PermissionAction) =>
+              new Permission({
+                resource,
+                action: grant,
+                attributes: hashMapOfGrants[role][resource][grant],
+              }),
+          );
+        })
+        .reduce((acc, val) => acc.concat(val), [])
+        .map((permission) => roleService.findOrCreatePermission(permission));
+      return Promise.all(_permissions).then((p) => {
+        return Promise.resolve({
+          name: role,
+          slug: role,
+          permissions: p,
+        });
+      });
+    });
+    roles = await roleService.create(await Promise.all(_roles));
   }
 
   const grants: GrantDto[] = roles
-    .map((role) =>
-      (role?.permissions || []).map(
+    ?.map((role) => {
+      return (role?.permissions || []).map(
         (permission) =>
           new GrantDto(
             role,
@@ -48,13 +51,11 @@ export async function RolesBuilderFactory(
             permission.resource,
             permission.attributes,
           ),
-      ),
-    )
-    // flatten array of arrays
+      );
+    })
     .reduce((acc, val) => acc.concat(val), []);
   return grants.length ? new RolesBuilder(grants) : rolesBuilder;
-  */
-  return rolesBuilder;
+  // return rolesBuilder;
 }
 
 /** Members */

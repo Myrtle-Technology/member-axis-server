@@ -14,6 +14,8 @@ import configuration from './config/configuration';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RoleService } from './role/role.service';
+import { AccessControlModule } from 'nest-access-control';
+import { RolesBuilderFactory } from './role/role.builder';
 
 @Module({
   imports: [
@@ -53,6 +55,11 @@ import { RoleService } from './role/role.service';
     OrganizationMemberModule,
     RoleModule,
     AuthModule,
+    AccessControlModule.forRootAsync({
+      imports: [RoleModule],
+      inject: [RoleService],
+      useFactory: RolesBuilderFactory,
+    }),
   ],
   controllers: [AppController],
   providers: [
