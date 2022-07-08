@@ -5,13 +5,10 @@
     "spec": false
   },
   "compilerOptions": {
-    "plugins": [
-      "@nestjs/swagger"
-    ],
+    "plugins": ["@nestjs/swagger"],
     "assets": [
       {
         "include": "mail/templates/**/*",
-        "outDir": "dist",
         "watchAssets": true
       }
     ],

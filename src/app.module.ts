@@ -16,6 +16,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RoleService } from './role/role.service';
 import { AccessControlModule } from 'nest-access-control';
 import { RolesBuilderFactory } from './role/role.builder';
+import { SmsModule } from './sms/sms.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { RolesBuilderFactory } from './role/role.builder';
       inject: [RoleService],
       useFactory: RolesBuilderFactory,
     }),
+    SmsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -68,11 +70,6 @@ import { RolesBuilderFactory } from './role/role.builder';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: RolesGuard,
-    // },
-    RoleService,
   ],
 })
 export class AppModule {}

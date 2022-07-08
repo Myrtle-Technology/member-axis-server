@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { MailService } from './mail.service';
 import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
+import { APP_NAME } from 'src/app.constants';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { ConfigService } from '@nestjs/config';
         // or
         transport: {
           host: config.get('MAIL_HOST'),
-          secure: false,
+          secure: true,
           auth: {
             user: config.get('MAIL_USER'),
             pass: config.get('MAIL_PASSWORD'),
@@ -22,14 +23,22 @@ import { ConfigService } from '@nestjs/config';
         },
         // logger: true,
         defaults: {
-          from: `"Tritech Agric Team" <${config.get('MAIL_FROM')}>`,
+          from: `"${APP_NAME} Team" <${config.get('MAIL_FROM')}>`,
         },
-        // preview: true,
+        preview: true,
         template: {
           dir: join(__dirname, 'templates'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
+          },
+        },
+        options: {
+          partials: {
+            dir: join(__dirname, 'templates', 'partials'),
+            options: {
+              strict: true,
+            },
           },
         },
       }),

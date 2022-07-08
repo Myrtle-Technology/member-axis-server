@@ -20,6 +20,7 @@ import { CreateOrganizationPasswordDto } from './dto/create-organization-passwor
 import { ConfigService } from '@nestjs/config';
 import { ORGANIZATION_API_HEADER } from './decorators/organization-api.decorator';
 import { RoleService } from 'src/role/role.service';
+import { SmsService } from 'src/sms/sms.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
@@ -27,6 +28,7 @@ export class AuthService {
   constructor(
     @Inject(REQUEST) private request: Request,
     private mailService: MailService,
+    private smsService: SmsService,
     private jwtService: JwtService,
     private configService: ConfigService,
     private userService: UserService,
@@ -41,29 +43,32 @@ export class AuthService {
     if (!user) {
       user = await this.userService.createUserByUsername(dto.username);
     }
-    const code = Math.floor(100000 + Math.random() * 900000);
-    console.log(user.id);
-    await Token.create({ token: code.toString(), userId: user.id }).save();
     if (isEmail(dto.username)) {
-      // this.mailService.sendVerificationCode(user.email, code);
+      const code = Math.floor(100000 + Math.random() * 900000);
+      await Token.create({ token: code.toString(), userId: user.id }).save();
+      await this.mailService.sendVerificationCode(user, code);
+      console.log(code);
     } else {
-      // send SMS with code
+      await this.smsService.sendOTP(user.phone);
     }
-    console.log(code);
     return user;
   }
 
   async validateOTP(dto: VerifyOtpDto) {
     const user = await this.userService.getUserByUsername(dto.username);
-    const token = await Token.findOne({
-      where: { token: dto.otp.toString(), userId: user.id },
-    });
-    if (!token) {
-      throw new BadRequestException(`OTP is invalid`);
+    if (isEmail(dto.username)) {
+      const token = await Token.findOne({
+        where: { token: dto.otp.toString(), userId: user.id },
+      });
+      if (!token) {
+        throw new BadRequestException(`OTP is invalid`);
+      }
+      await token.remove();
+    } else {
+      this.smsService.verifyOTP(user.phone, dto.otp.toString());
     }
     user.verified = true;
     await user.save();
-    await token.remove();
     const payload = {
       username: user.email,
       userId: user.id,
@@ -72,7 +77,7 @@ export class AuthService {
     // update personal details, create organization, and find User Organizations
     return {
       accessToken: this.jwtService.sign(payload, { expiresIn: '24h' }),
-      user: token.user,
+      user: user,
     };
   }
 
@@ -97,6 +102,7 @@ export class AuthService {
     });
     delete member.password;
     // TODO: send a welcome Email to user
+    this.mailService.welcomeRegisteredOrganization(user, organization);
     return member;
   }
 
@@ -149,5 +155,17 @@ export class AuthService {
       relations: ['organization'],
     });
     return orgMember.map((om) => om.organization);
+  }
+
+  async initForgotOrganizationPassword() {
+    //
+  }
+
+  async forgotOrganizationPassword() {
+    //
+  }
+
+  async acceptOrganizationInvite() {
+    //
   }
 }
