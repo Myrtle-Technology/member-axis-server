@@ -21,6 +21,7 @@ import { ConfigService } from '@nestjs/config';
 import { ORGANIZATION_API_HEADER } from './decorators/organization-api.decorator';
 import { RoleService } from 'src/role/role.service';
 import { SmsService } from 'src/sms/sms.service';
+import { TokenData } from './dto/token-data.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
@@ -146,7 +147,7 @@ export class AuthService {
 
   async loginToOrganization(dto: LoginDto) {
     const organizationMember = (this.request as any).organizationMember;
-    const payload = {
+    const payload: TokenData = {
       username: dto.username,
       organizationMemberId: organizationMember.id,
       organizationId: organizationMember.organizationId,

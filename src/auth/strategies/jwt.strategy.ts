@@ -11,7 +11,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     public userService: UserService,
     public organizationMemberService: OrganizationMemberService,
-    private reflector: Reflector,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -21,17 +20,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    // const user = await this.userService.getUserByUsername(payload.username);
-    // if (!user) {
-    //   throw new UnauthorizedException();
-    // }
-    // if (payload.organizationId) {
-    //   const member = this.organizationMemberService.findOne({
-    //     where: { memberId: user.id, organizationId: payload.organizationId },
-    //   });
+    const user = await this.userService.getUserByUsername(payload.username);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    if (payload.organizationId) {
+      const member = this.organizationMemberService.findOne({
+        where: { userId: user.id, organizationId: payload.organizationId },
+      });
 
-    //   return member;
-    // }
-    return payload;
+      return member;
+    }
+    return user;
   }
 }

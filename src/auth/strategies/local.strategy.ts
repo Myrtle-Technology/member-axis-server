@@ -30,7 +30,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     if (!organizationMember) {
       throw new UnauthorizedException();
     }
-    (request as any).organizationMember = organizationMember;
+    (request as any).user = organizationMember;
     return organizationMember;
   }
 }
