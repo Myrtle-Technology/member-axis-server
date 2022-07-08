@@ -40,10 +40,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     // if it is not an a allowUserWithoutOrganization route,
     // and user has no organization, throw exception
-    if (
-      !allowUserWithoutOrganization &&
-      req.tokenData?.organizationId !== null
-    ) {
+    if (!allowUserWithoutOrganization && !req.tokenData?.organizationId) {
       throw new UnauthorizedException(
         'User is not allowed to access this route',
       );

@@ -20,7 +20,7 @@ export class UserService extends TypeOrmCrudService<User> {
 
   async update(userId: number, dto: UpdateUserDto) {
     delete dto.verified; // verification can only happen via auth verifyOTP route
-    this.repo.update(userId, dto);
+    await this.repo.update(userId, dto);
     return this.findOne(userId);
   }
 

@@ -146,7 +146,7 @@ export class AuthService {
   }
 
   async loginToOrganization(dto: LoginDto) {
-    const organizationMember = (this.request as any).organizationMember;
+    const organizationMember = (this.request as any).user;
     const payload: TokenData = {
       username: dto.username,
       organizationMemberId: organizationMember.id,

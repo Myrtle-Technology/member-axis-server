@@ -11,11 +11,21 @@ import {
   ParsedBody,
   CreateManyDto,
   Crud,
+  CrudAuth,
 } from '@rewiko/crud';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { UseRoles } from 'nest-access-control';
+import { OrganizationApi } from 'src/auth/decorators/organization-api.decorator';
 
 @ApiBearerAuth()
+@OrganizationApi()
 @ApiTags('members')
+@CrudAuth({
+  filter: (user: OrganizationMember) => ({
+    organizationId: user.organizationId,
+  }),
+  property: 'user',
+})
 @Crud({
   model: {
     type: OrganizationMember,
@@ -31,6 +41,7 @@ export class OrganizationMemberController
     return this;
   }
 
+  @UseRoles({ action: 'read', resource: 'members', possession: 'own' })
   @Override()
   getMany(@ParsedRequest() req: CrudRequest) {
     return this.base.getManyBase(req);
