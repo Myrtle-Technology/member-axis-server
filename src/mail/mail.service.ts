@@ -28,7 +28,7 @@ export class MailService {
     });
   }
 
-  async sendVerificationCode(user: User, code: number) {
+  async sendVerificationCode(user: User, code: number | string) {
     return await this.mailerService.sendMail({
       to: user.email,
       subject: `${APP_NAME} – email verification`,

@@ -1,16 +1,20 @@
-<p>Hi {{name}}!</p>
+{{> header}}
+<div>
+  <p>Hi {{name}}!</p>
 
-<p>Your verification code is
-  {{code}}. This verification code expires in 30 minutes</p>
+  <p>Your verification code is
+    {{code}}. This verification code expires in 30 minutes</p>
 
-<p>Enter this code in our website to continue your registration</p>
+  <p>Enter this code in our website to continue your registration</p>
 
-{{! <p>Click here [open code in app] to open the [app/portal landing page].</p> }}
+  {{! <p>Click here [open code in app] to open the [app/portal landing page].</p> }}
 
-<p>If you have any questions, please reply this email.</p>
+  <p>If you have any questions, please reply this email.</p>
 
-<p>
-  <span>We’re glad you’re here!</span>
-  <br />
-  <span>The {{APP_NAME}} Team</span>
-</p>
+  <p>
+    <span>We’re glad you’re here!</span>
+    <br />
+    <span>The {{APP_NAME}} Team</span>
+  </p>
+</div>
+{{> footer}}

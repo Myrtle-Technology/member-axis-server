@@ -43,15 +43,27 @@ export class AuthService {
     if (!user) {
       user = await this.userService.createUserByUsername(dto.username);
     }
+    const code = Math.floor(100000 + Math.random() * 900000);
+    const token = await this.createToken(user, code.toString());
     if (isEmail(dto.username)) {
-      const code = Math.floor(100000 + Math.random() * 900000);
-      await Token.create({ token: code.toString(), userId: user.id }).save();
-      await this.mailService.sendVerificationCode(user, code);
-      console.log(code);
+      await this.mailService.sendVerificationCode(user, token.token);
     } else {
-      await this.smsService.sendOTP(user.phone);
+      await this.smsService.sendOTPLocal(user.phone, token.token);
     }
     return user;
+  }
+
+  async createToken(user: User, code: string) {
+    const token = await Token.findOne({
+      where: { userId: user.id },
+    });
+    if (token) {
+      await token.remove();
+    }
+    return await Token.create({
+      token: code.toString(),
+      userId: user.id,
+    }).save();
   }
 
   async validateOTP(dto: VerifyOtpDto) {

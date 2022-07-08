@@ -6,6 +6,7 @@ import { TermiiService } from './termii.service';
 @Injectable()
 export class SmsService {
   constructor(private termii: TermiiService) {}
+
   sendWelcomeSMS(phone: string) {
     if (!isPhoneNumber(phone)) {
       throw Error('Invalid phone number');
@@ -16,16 +17,28 @@ export class SmsService {
       APP_NAME,
     );
   }
+
+  sendOTPLocal(phone: string, otp: string) {
+    if (!isPhoneNumber(phone)) {
+      throw Error('Invalid phone number');
+    }
+    return this.termii.sendSms(
+      phone.replace('+', ''),
+      `Your otp is ${otp} from ${APP_NAME}`,
+    );
+  }
+
   verifyOTP(phone: string, otp: string) {
     if (!isPhoneNumber(phone)) {
       throw Error('Invalid phone number');
     }
     return this.termii.verifyOtp(phone.replace('+', ''), otp);
   }
+
   sendOTP(phone: string) {
     if (!isPhoneNumber(phone)) {
       throw Error('Invalid phone number');
     }
-    return this.termii.sendOtp(phone.replace('+', ''), APP_NAME);
+    return this.termii.sendOtp(phone.replace('+', ''), null);
   }
 }
