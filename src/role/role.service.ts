@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@rewiko/crud-typeorm';
+import slugify from 'slugify';
 import { Repository } from 'typeorm';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
@@ -30,7 +31,32 @@ export class RoleService extends TypeOrmCrudService<Role> {
     return this.repo.save(dto, { chunk: 50 });
   }
 
-  async findOrCreatePermission(dto: Partial<Permission>) {
+  async findOrCreateRole(dto: Partial<Role>): Promise<Role> {
+    try {
+      let role = await this.repo.findOne({
+        where: { slug: slugify(dto.slug) },
+      });
+      if (!role) {
+        role = await this.repo.save(dto);
+      }
+
+      // if (role.permissions.length > 0) {
+      await Promise.all(
+        dto.permissions.map((permission) => {
+          this.findOrCreatePermission(permission);
+          role.permissions = [...role.permissions, permission];
+        }),
+      );
+      // }
+      role.save();
+      return role;
+    } catch (error) {
+      console.log(error.message);
+      return this.findOrCreateRole(dto);
+    }
+  }
+
+  async findOrCreatePermission(dto: Partial<Permission>): Promise<Permission> {
     try {
       let permission = await this.permissionRepo.findOne({
         where: { resource: dto.resource, action: dto.action },

@@ -1,4 +1,11 @@
-import { Controller, Post, Body, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Request,
+  UseGuards,
+  Get,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { LoginDto } from './dto/login.dto';
@@ -17,6 +24,16 @@ import { OrganizationApi } from './decorators/organization-api.decorator';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Get('me')
+  me(@Request() req: TokenRequest) {
+    return req.user;
+  }
+
+  @Get('current-organization')
+  currentOrganization(@Request() req: TokenRequest) {
+    return req.user.organization;
+  }
 
   @Public()
   @Post('verify-email-or-phone')

@@ -3,14 +3,11 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { jwtConstants } from '../constants';
 import { UserService } from 'src/user/user.service';
-import { OrganizationMemberService } from 'src/organization-member/organization-member.service';
+import { OrganizationMember } from 'src/organization-member/entities';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    public userService: UserService,
-    public organizationMemberService: OrganizationMemberService,
-  ) {
+  constructor(public userService: UserService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -24,9 +21,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
     if (payload.organizationId) {
-      const member = this.organizationMemberService.findOne({
+      const member = await OrganizationMember.findOne({
         where: { userId: user.id, organizationId: payload.organizationId },
+        relations: ['role', 'organization', 'user'],
       });
+      // workaround for ACGuard
+      (member as any).roles = [member.role.slug];
+
+      // ensure password is removed
+      delete member.password;
 
       return member;
     }

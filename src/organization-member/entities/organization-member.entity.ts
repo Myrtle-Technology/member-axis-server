@@ -61,7 +61,13 @@ export class OrganizationMember extends BaseEntity {
   @Exclude()
   @IsNotEmpty()
   @Column()
-  @IsOptional({ groups: [CrudRequestTypes.UPDATE] })
+  @IsOptional({
+    groups: [
+      CrudRequestTypes.UPDATE,
+      CrudRequestTypes.READ,
+      CrudRequestTypes.DELETE,
+    ],
+  })
   password: string;
 
   @Column({ type: 'json', nullable: true })

@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { OrganizationMemberService } from './organization-member.service';
 import { OrganizationMemberController } from './organization-member.controller';
 import { OrganizationMember } from './entities';

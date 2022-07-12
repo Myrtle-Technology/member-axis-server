@@ -2,7 +2,7 @@ import { RolesBuilder } from 'nest-access-control';
 import { Resources } from './enums/resources.enum';
 import { RoleService } from './role.service';
 import { GrantDto } from './dto/grant.dto';
-import { Permission, Role } from './entities';
+import { Permission } from './entities';
 import { Role as RoleEnum } from './enums/role.enum';
 import { PermissionAction } from './enums/permission-action.enum';
 
@@ -14,32 +14,36 @@ export async function RolesBuilderFactory(
 ): Promise<RolesBuilder> {
   const hashMapOfGrants = rolesBuilder.getGrants();
   let roles = await roleService.find();
-  if (roles.length === 0) {
-    const _roles = Object.keys(hashMapOfGrants).map((role) => {
-      const _permissions = Object.keys(hashMapOfGrants[role])
-        .map((resource: Resources) => {
-          if ((resource as string) == '$extend') return [];
-          return Object.keys(hashMapOfGrants[role][resource]).map(
-            (grant: PermissionAction) =>
-              new Permission({
-                resource,
-                action: grant,
-                attributes: hashMapOfGrants[role][resource][grant],
-              }),
-          );
-        })
-        .reduce((acc, val) => acc.concat(val), [])
-        .map((permission) => roleService.findOrCreatePermission(permission));
-      return Promise.all(_permissions).then((p) => {
-        return Promise.resolve({
-          name: role,
-          slug: role,
-          permissions: p,
-        });
+  // if (roles.length === 0) {
+  const _roles = Object.keys(hashMapOfGrants).map((role) => {
+    const _permissions = Object.keys(hashMapOfGrants[role])
+      .map((resource: Resources) => {
+        if ((resource as string) == '$extend') return [];
+        return Object.keys(hashMapOfGrants[role][resource]).map(
+          (grant: PermissionAction) =>
+            new Permission({
+              resource,
+              action: grant,
+              attributes: hashMapOfGrants[role][resource][grant],
+            }),
+        );
+      })
+      .reduce((acc, val) => acc.concat(val), [])
+      .map((permission) => roleService.findOrCreatePermission(permission));
+    return Promise.all(_permissions).then((p) => {
+      return Promise.resolve({
+        name: role,
+        slug: role,
+        permissions: p,
       });
     });
-    roles = await roleService.create(await Promise.all(_roles));
-  }
+  });
+  roles = await Promise.all(
+    (
+      await Promise.all(_roles)
+    ).map((role) => roleService.findOrCreateRole(role)),
+  );
+  // }
 
   const grants: GrantDto[] = roles
     ?.map((role) => {
@@ -59,18 +63,13 @@ export async function RolesBuilderFactory(
 }
 
 /** Members */
-rolesBuilder
-  .grant(RoleEnum.Member)
-  .createOwn(Resources.Member)
-  .deleteOwn(Resources.Member)
-  .updateOwn(Resources.Member)
-  .readAny(Resources.MembershipPlan);
+rolesBuilder.grant(RoleEnum.Member).readAny(Resources.MembershipPlan);
 
 /** Admin */
 rolesBuilder
   .grant(RoleEnum.Admin)
   // .extend(RoleEnum.Member) replaced with block
-  .grant(RoleEnum.Member)
+  .readOwn(Resources.Member)
   .createOwn(Resources.Member)
   .deleteOwn(Resources.Member)
   .updateOwn(Resources.Member)

@@ -1,7 +1,5 @@
-import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TokenRequest } from 'src/auth/interfaces/token-request.interface';
 import {
   FilterOperator,
   paginate,
@@ -14,62 +12,64 @@ import { CreateOrganizationMemberDto } from './dto/create-organization-member.dt
 import { UpdateOrganizationMemberDto } from './dto/update-organization-member.dto';
 import { OrganizationMember } from './entities';
 
-@Injectable({ scope: Scope.REQUEST })
 export class OrganizationMemberService {
   logger = new Logger(OrganizationMemberService.name);
   constructor(
-    @Inject(REQUEST) private request: TokenRequest,
     @InjectRepository(OrganizationMember)
     private repo: Repository<OrganizationMember>,
   ) {}
 
-  organizationId() {
-    return this.request.tokenData.organizationId;
-  }
+  organizationId: number;
 
   find = this.repo.find;
   findOne = this.repo.findOne;
   create = this.repo.create;
 
-  config: PaginateConfig<OrganizationMember> = {
-    relations: ['organization', 'user', 'role'],
-    sortableColumns: [
-      'id',
-      'organizationId',
-      'organization',
-      'userId',
-      'user',
-      'roleId',
-      'role',
-      'bio',
-      'contactPhone',
-      'officeTitle',
-      'createdAt',
-      'updatedAt',
-    ],
-    defaultSortBy: [['id', 'DESC']],
-    filterableColumns: {
-      organizationId: [FilterOperator.EQ],
-      userId: [FilterOperator.EQ],
-      roleId: [FilterOperator.EQ, FilterOperator.NOT],
-    },
-    maxLimit: 100,
-    defaultLimit: 50,
-    where: { organizationId: this.organizationId },
-  };
+  config(organizationId: number): PaginateConfig<OrganizationMember> {
+    return {
+      relations: ['organization', 'user', 'role'],
+      sortableColumns: [
+        'id',
+        'organizationId',
+        'organization',
+        'userId',
+        'user',
+        'roleId',
+        'role',
+        'bio',
+        'contactPhone',
+        'officeTitle',
+        'createdAt',
+        'updatedAt',
+      ],
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {
+        organizationId: [FilterOperator.EQ],
+        userId: [FilterOperator.EQ],
+        roleId: [FilterOperator.EQ, FilterOperator.NOT],
+      },
+      maxLimit: 100,
+      defaultLimit: 50,
+      where: { organizationId },
+    };
+  }
 
   getMany(query?: PaginateQuery): Promise<Paginated<OrganizationMember>> {
-    return paginate(query, this.repo, this.config);
+    return paginate(query, this.repo, this.config(this.organizationId));
+    // return this.repo.find({
+    //   where: { organizationId: this.organizationId },
+    // });
   }
 
   getOne(id: number) {
     return this.repo.findOne({
       where: { id, organizationId: this.organizationId },
+      relations: ['role', 'organization', 'user'],
     });
   }
 
   createOne(dto: CreateOrganizationMemberDto): Promise<OrganizationMember> {
-    dto.organizationId = this.organizationId();
+    dto.organizationId = this.organizationId;
     // TODO: password hash or invite user
     return this.repo.save(dto);
   }
@@ -78,7 +78,10 @@ export class OrganizationMemberService {
     bulkDto: CreateOrganizationMemberDto[],
   ): Promise<OrganizationMember[]> {
     return this.repo.save(
-      bulkDto.map((dto) => ({ ...dto, organizationId: this.organizationId() })),
+      bulkDto.map((dto) => ({
+        ...dto,
+        organizationId: this.organizationId,
+      })),
     );
   }
 
@@ -86,11 +89,14 @@ export class OrganizationMemberService {
     id: number,
     dto: UpdateOrganizationMemberDto,
   ): Promise<OrganizationMember> {
-    await this.repo.update({ id, organizationId: this.organizationId() }, dto);
+    await this.repo.update({ id, organizationId: this.organizationId }, dto);
     return this.repo.findOne(id);
   }
   async deleteOne(id: number): Promise<boolean> {
-    await this.repo.delete({ id, organizationId: this.organizationId() });
+    await this.repo.delete({
+      id,
+      organizationId: this.organizationId,
+    });
     return true;
   }
 }
