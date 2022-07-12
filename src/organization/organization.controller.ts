@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Request } from '@nestjs/common';
 import { OrganizationService } from './organization.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
@@ -8,17 +8,23 @@ import {
   ParsedRequest,
   CrudRequest,
   ParsedBody,
-  CreateManyDto,
   Crud,
 } from '@rewiko/crud';
 import { Organization } from './entities';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/auth/decorators/public.decorator';
+import { Permit } from 'src/role/decorators/permit.decorator';
+import { Resources } from 'src/role/enums/resources.enum';
+import { TokenRequest } from 'src/auth/interfaces/token-request.interface';
 
 @ApiBearerAuth()
 @ApiTags('organizations')
 @Crud({
   model: {
     type: Organization,
+  },
+  routes: {
+    exclude: ['createManyBase', 'replaceOneBase', 'recoverOneBase'],
   },
 })
 @Controller('organizations')
@@ -29,16 +35,31 @@ export class OrganizationController implements CrudController<Organization> {
     return this;
   }
 
+  @Public()
   @Override()
   getMany(@ParsedRequest() req: CrudRequest) {
+    // req.parsed.filter = [
+    //   ...req.parsed.filter,
+    //   {
+    //     field: 'organizationId',
+    //     operator: '$eq',
+    //     value: xReq.tokenData.organizationId,
+    //   },
+    // ];
     return this.base.getManyBase(req);
   }
 
+  @Public()
   @Override()
   getOne(@ParsedRequest() req: CrudRequest) {
     return this.base.getOneBase(req);
   }
 
+  @Permit({
+    resource: Resources.Organization,
+    action: 'create',
+    possession: 'any',
+  })
   @Override()
   createOne(
     @ParsedRequest() req: CrudRequest,
@@ -47,30 +68,30 @@ export class OrganizationController implements CrudController<Organization> {
     return this.base.createOneBase(req, dto);
   }
 
-  @Override()
-  createMany(
-    @ParsedRequest() req: CrudRequest,
-    @ParsedBody() dto: CreateManyDto<Organization>,
-  ): Promise<Organization[]> {
-    return this.base.createManyBase(req, dto);
-  }
-
+  @Permit({
+    resource: Resources.Organization,
+    action: 'update',
+    possession: 'any',
+  })
   @Override()
   updateOne(
+    @Request() xReq: TokenRequest,
     @ParsedRequest() req: CrudRequest,
-    @ParsedBody() dto: Organization,
+    @ParsedBody() dto: UpdateOrganizationDto,
   ): Promise<Organization> {
+    req.parsed.search.$and = [
+      ...req.parsed.search.$and,
+      { organizationId: xReq.tokenData.organizationId },
+    ];
+    dto.id = xReq.tokenData.organizationId;
     return this.base.updateOneBase(req, dto);
   }
 
-  @Override()
-  replaceOne(
-    @ParsedRequest() req: CrudRequest,
-    @ParsedBody() dto: Organization,
-  ): Promise<Organization> {
-    return this.base.replaceOneBase(req, dto);
-  }
-
+  @Permit({
+    resource: Resources.Organization,
+    action: 'delete',
+    possession: 'any',
+  })
   @Override()
   deleteOne(@ParsedRequest() req: CrudRequest): Promise<void | Organization> {
     return this.base.deleteOneBase(req);

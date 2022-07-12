@@ -18,6 +18,7 @@ import { Permit } from 'src/role/decorators/permit.decorator';
 import { Paginate, PaginateQuery } from 'src/paginator';
 import { TokenRequest } from 'src/auth/interfaces/token-request.interface';
 import { Resources } from 'src/role/enums/resources.enum';
+import { PaginateQueryOptions } from 'src/paginator/paginate-query-options.decorator';
 
 @ApiBearerAuth()
 @OrganizationApi()
@@ -27,14 +28,20 @@ export class OrganizationMemberController {
   constructor(public service: OrganizationMemberService) {}
 
   @Get()
-  @Permit({ resource: Resources.Member, action: 'read', possession: 'own' })
-  @Permit({ resource: Resources.Member, action: 'read', possession: 'any' })
+  @PaginateQueryOptions()
+  @Permit(
+    { resource: Resources.Member, action: 'read', possession: 'own' },
+    { resource: Resources.Member, action: 'read', possession: 'any' },
+  )
   getMany(@Request() request: TokenRequest, @Paginate() query: PaginateQuery) {
     this.service.organizationId = request.tokenData.organizationId;
     return this.service.getMany(query);
   }
   @Get(':id')
-  @Permit({ resource: Resources.Member, action: 'read', possession: 'own' })
+  @Permit(
+    { resource: Resources.Member, action: 'read', possession: 'own' },
+    { resource: Resources.Member, action: 'read', possession: 'any' },
+  )
   getOne(@Request() request: TokenRequest, @Param('id') id: number) {
     this.service.organizationId = request.tokenData.organizationId;
     return this.service.getOne(+id);
