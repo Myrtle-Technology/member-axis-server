@@ -1,10 +1,9 @@
 import { Controller, Post, Body, Request, UseGuards } from '@nestjs/common';
-import { Request as ERequest } from 'express';
 import { AuthService } from './auth.service';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateUserDto } from 'src/user/dto/update-user.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { AllowUserWithoutOrganization } from './decorators/allow-user-without-organization.decorator';
 import { FindUserOrganization } from './dto/find-user-organization..dto';
 import { Public } from './decorators/public.decorator';
@@ -32,7 +31,6 @@ export class AuthController {
   }
 
   @AllowUserWithoutOrganization()
-  @ApiBearerAuth()
   @Post('update-personal-details')
   updatePersonalDetails(
     @Request() req: TokenRequest,
@@ -42,7 +40,6 @@ export class AuthController {
   }
 
   @AllowUserWithoutOrganization()
-  @ApiBearerAuth()
   @Post('create-organization')
   createOrganization(
     @Request() req: TokenRequest,
@@ -60,7 +57,6 @@ export class AuthController {
   }
 
   @AllowUserWithoutOrganization()
-  @ApiBearerAuth()
   @Post('find-organizations')
   findUserOrganizations(
     @Request() req: TokenRequest,

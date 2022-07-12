@@ -1,93 +1,68 @@
-import { Controller } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { OrganizationMemberService } from './organization-member.service';
 import { CreateOrganizationMemberDto } from './dto/create-organization-member.dto';
 import { UpdateOrganizationMemberDto } from './dto/update-organization-member.dto';
 import { OrganizationMember } from './entities';
-import {
-  CrudController,
-  Override,
-  ParsedRequest,
-  CrudRequest,
-  ParsedBody,
-  CreateManyDto,
-  Crud,
-  CrudAuth,
-} from '@rewiko/crud';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { UseRoles } from 'nest-access-control';
 import { OrganizationApi } from 'src/auth/decorators/organization-api.decorator';
+import { Permit } from 'src/role/decorators/permit.decorator';
+import { Paginate, PaginateQuery } from 'src/paginator';
 
 @ApiBearerAuth()
 @OrganizationApi()
 @ApiTags('members')
-@CrudAuth({
-  filter: (user: OrganizationMember) => ({
-    organizationId: user.organizationId,
-  }),
-  property: 'user',
-})
-@Crud({
-  model: {
-    type: OrganizationMember,
-  },
-})
 @Controller('members')
-export class OrganizationMemberController
-  implements CrudController<OrganizationMember>
-{
+export class OrganizationMemberController {
   constructor(public service: OrganizationMemberService) {}
 
-  get base(): CrudController<OrganizationMember> {
-    return this;
+  @Get()
+  // @Permit({ resource: 'members', action: 'read', possession: 'own' })
+  getMany(@Paginate() query: PaginateQuery) {
+    return this.service.getMany(query);
+  }
+  @Get(':id')
+  @Permit({ resource: 'members', action: 'read', possession: 'own' })
+  getOne(@Param('id') id: number) {
+    return this.service.getOne(+id);
   }
 
-  @UseRoles({ action: 'read', resource: 'members', possession: 'own' })
-  @Override()
-  getMany(@ParsedRequest() req: CrudRequest) {
-    return this.base.getManyBase(req);
-  }
-
-  @Override()
-  getOne(@ParsedRequest() req: CrudRequest) {
-    return this.base.getOneBase(req);
-  }
-
-  @Override()
+  @Post()
+  @Permit({ resource: 'members', action: 'create', possession: 'own' })
   createOne(
-    @ParsedRequest() req: CrudRequest,
-    @ParsedBody() dto: OrganizationMember,
+    @Body() dto: CreateOrganizationMemberDto,
   ): Promise<OrganizationMember> {
-    return this.base.createOneBase(req, dto);
+    return this.service.createOne(dto);
   }
 
-  @Override()
+  @Post('bulk')
+  @Permit({ resource: 'members', action: 'create', possession: 'own' })
   createMany(
-    @ParsedRequest() req: CrudRequest,
-    @ParsedBody() dto: CreateManyDto<OrganizationMember>,
+    @Body() dto: CreateOrganizationMemberDto[],
   ): Promise<OrganizationMember[]> {
-    return this.base.createManyBase(req, dto);
+    return this.service.createMany(dto);
   }
 
-  @Override()
+  @Patch(':id')
+  @Permit({ resource: 'members', action: 'update', possession: 'own' })
   updateOne(
-    @ParsedRequest() req: CrudRequest,
-    @ParsedBody() dto: OrganizationMember,
+    @Param('id') id: number,
+    @Body() dto: UpdateOrganizationMemberDto,
   ): Promise<OrganizationMember> {
-    return this.base.updateOneBase(req, dto);
+    return this.service.updateOne(id, dto);
   }
 
-  @Override()
-  replaceOne(
-    @ParsedRequest() req: CrudRequest,
-    @ParsedBody() dto: OrganizationMember,
-  ): Promise<OrganizationMember> {
-    return this.base.replaceOneBase(req, dto);
-  }
-
-  @Override()
-  deleteOne(
-    @ParsedRequest() req: CrudRequest,
-  ): Promise<void | OrganizationMember> {
-    return this.base.deleteOneBase(req);
+  @Delete(':id')
+  @Permit({ resource: 'members', action: 'delete', possession: 'own' })
+  async deleteOne(@Param('id') id: number): Promise<{ deleted: boolean }> {
+    const deleted = await this.service.deleteOne(+id);
+    return { deleted };
   }
 }

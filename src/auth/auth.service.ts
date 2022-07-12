@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, Scope, Inject } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import { Request } from 'express';
 import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 import { User } from 'src/user/entities';
 import { VerifyEmailDto } from './dto/verify-email.dto';
@@ -22,12 +21,13 @@ import { ORGANIZATION_API_HEADER } from './decorators/organization-api.decorator
 import { RoleService } from 'src/role/role.service';
 import { SmsService } from 'src/sms/sms.service';
 import { TokenData } from './dto/token-data.dto';
+import { TokenRequest } from './interfaces/token-request.interface';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
   private readonly saltRounds = +this.configService.get<number>('SALT_ROUNDS');
   constructor(
-    @Inject(REQUEST) private request: Request,
+    @Inject(REQUEST) private request: TokenRequest,
     private mailService: MailService,
     private smsService: SmsService,
     private jwtService: JwtService,
@@ -37,6 +37,14 @@ export class AuthService {
     private organizationService: OrganizationService,
     private organizationMemberService: OrganizationMemberService,
   ) {}
+
+  get organizationSlug() {
+    return this.request.headers[ORGANIZATION_API_HEADER];
+  }
+
+  get organizationId() {
+    return this.request.tokenData.organizationId;
+  }
 
   async verifyEmailOrPhone(dto: VerifyEmailDto) {
     let user: User;

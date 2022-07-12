@@ -11,7 +11,7 @@ import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector, private jwtService: JwtService) {
+  constructor(protected reflector: Reflector, private jwtService: JwtService) {
     super();
   }
 
@@ -23,12 +23,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (isPublic) {
       return true;
     }
-
-    const [req] = context.getArgs();
-    const bearerToken: string[] = (req.headers.authorization || '').split(' ');
+    const request = context.switchToHttp().getRequest();
+    const bearerToken: string[] = (request.headers.authorization || '').split(
+      ' ',
+    );
     if (bearerToken.length > 1) {
-      req.tokenData = this.jwtService.decode(
-        req.headers.authorization.split(' ')[1],
+      request.tokenData = this.jwtService.decode(
+        request.headers.authorization.split(' ')[1],
       );
     }
     // check if not authentication route
@@ -40,7 +41,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     // if it is not an a allowUserWithoutOrganization route,
     // and user has no organization, throw exception
-    if (!allowUserWithoutOrganization && !req.tokenData?.organizationId) {
+    if (!allowUserWithoutOrganization && !request.tokenData?.organizationId) {
       throw new UnauthorizedException(
         'User is not allowed to access this route',
       );

@@ -39,7 +39,7 @@ import { SmsModule } from './sms/sms.module';
           migrationsDir: 'src/migration',
         },
         // synchronize: true,
-        logging: true,
+        // logging: true,
       }),
       inject: [ConfigService],
     }),
