@@ -7,6 +7,7 @@ import {
   BaseEntity,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { IsNotEmpty, IsOptional, IsPhoneNumber } from 'class-validator';
 import { User } from 'src/user/entities';
@@ -15,7 +16,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { CrudRequestTypes } from 'nestjs-crud-microservice-validation/lib';
 import { Organization } from 'src/organization/entities';
-import { MetaInformation } from '../dto/meta-information.dto';
+import { MemberCommonField } from 'src/member-common-field/entities/member-common-field.entity';
 
 @Entity()
 export class OrganizationMember extends BaseEntity {
@@ -70,15 +71,15 @@ export class OrganizationMember extends BaseEntity {
   })
   password: string;
 
-  @Column({ type: 'json', nullable: true })
-  OtherInformation: MetaInformation[];
+  @OneToMany(() => MemberCommonField, (c) => c.organizationMember)
+  commonFields: MemberCommonField[];
 
   @CreateDateColumn() createdAt: Date;
 
   @UpdateDateColumn() updatedAt: Date;
 
-  constructor(permission?: Partial<OrganizationMember>) {
+  constructor(member?: Partial<OrganizationMember>) {
     super();
-    Object.assign(this, permission);
+    Object.assign(this, member);
   }
 }

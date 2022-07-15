@@ -18,6 +18,7 @@ import {
 import { User } from 'src/user/entities';
 import { Role } from 'src/role/entities';
 import { OrganizationMember } from 'src/organization-member/entities';
+import { CommonField } from 'src/common-field/entities/common-field.entity';
 
 @Entity()
 @Unique('slug_unique', ['slug'])
@@ -70,7 +71,6 @@ export class Organization {
   owner: User;
 
   @OneToMany(() => Role, (role) => role.ownerOrganization)
-  @JoinColumn({ name: 'ownerId' })
   roles: Role[];
 
   @CreateDateColumn() createdAt: Date;
@@ -82,4 +82,7 @@ export class Organization {
     (organizationMember) => organizationMember.organization,
   )
   organizationMembers: OrganizationMember[];
+
+  @OneToMany(() => CommonField, (commonField) => commonField.organization)
+  commonFields: any;
 }
