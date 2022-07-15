@@ -32,9 +32,9 @@ export class CommonField extends BaseEntity {
   label: string;
 
   @Column({
-    default: 'text',
-    enum: Object.values(CommonFieldType),
-    enumName: 'CommonFieldType',
+    type: 'enum',
+    default: CommonFieldType.text,
+    enum: CommonFieldType,
   })
   type: CommonFieldType;
 
@@ -43,6 +43,9 @@ export class CommonField extends BaseEntity {
 
   @Column({ default: false })
   required: boolean;
+
+  @Column({ default: 0, type: 'int' })
+  order: number;
 
   @OneToMany(() => MemberCommonField, (c) => c.commonField)
   members: MemberCommonField[];

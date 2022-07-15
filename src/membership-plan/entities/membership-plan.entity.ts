@@ -28,9 +28,9 @@ export class MembershipPlan extends BaseEntity {
   membershipFee: number;
 
   @Column({
+    type: 'enum',
     default: PlanPaymentMethod.offline,
-    enum: Object.values(PlanPaymentMethod),
-    enumName: 'PlanPaymentMethod',
+    enum: PlanPaymentMethod,
   })
   paymentMethod: PlanPaymentMethod;
 
@@ -41,8 +41,9 @@ export class MembershipPlan extends BaseEntity {
   memberCanChangeTo: boolean;
 
   @Column({
-    enum: Object.values(PlanRenewalDuration),
-    enumName: 'PlanRenewalDuration',
+    default: PlanRenewalDuration.never,
+    enum: PlanRenewalDuration,
+    type: 'enum',
   })
   renewalDuration: PlanRenewalDuration;
 

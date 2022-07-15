@@ -67,7 +67,7 @@ export class MembershipPlanService {
   getOne(id: number) {
     return this.repo.findOne({
       where: { id, organizationId: this.organizationId },
-      relations: ['role', 'organization', 'user'],
+      relations: ['organization'],
     });
   }
 
@@ -92,6 +92,7 @@ export class MembershipPlanService {
     await this.repo.update({ id, organizationId: this.organizationId }, dto);
     return this.repo.findOne(id);
   }
+
   async deleteOne(id: number): Promise<boolean> {
     await this.repo.delete({
       id,
