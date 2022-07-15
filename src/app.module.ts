@@ -22,7 +22,6 @@ import { FormModule } from './form/form.module';
 import { InvitationModule } from './invitation/invitation.module';
 import { CommonFieldModule } from './common-field/common-field.module';
 import { MemberCommonFieldModule } from './member-common-field/member-common-field.module';
-import { FormCommonFieldModule } from './form-common-field/form-common-field.module';
 
 @Module({
   imports: [
@@ -73,7 +72,6 @@ import { FormCommonFieldModule } from './form-common-field/form-common-field.mod
     InvitationModule,
     CommonFieldModule,
     MemberCommonFieldModule,
-    FormCommonFieldModule,
   ],
   controllers: [AppController],
   providers: [
