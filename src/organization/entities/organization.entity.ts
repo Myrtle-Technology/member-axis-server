@@ -19,6 +19,7 @@ import { User } from 'src/user/entities';
 import { Role } from 'src/role/entities';
 import { OrganizationMember } from 'src/organization-member/entities';
 import { CommonField } from 'src/common-field/entities/common-field.entity';
+import { MembershipPlan } from 'src/membership-plan/entities/membership-plan.entity';
 
 @Entity()
 @Unique('slug_unique', ['slug'])
@@ -84,5 +85,8 @@ export class Organization {
   organizationMembers: OrganizationMember[];
 
   @OneToMany(() => CommonField, (commonField) => commonField.organization)
-  commonFields: any;
+  commonFields: CommonField[];
+
+  @OneToMany(() => MembershipPlan, (mp) => mp.organization)
+  membershipPlans: MembershipPlan[];
 }

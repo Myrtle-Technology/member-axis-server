@@ -1,5 +1,7 @@
 import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
 import {
   FilterOperator,
   paginate,
@@ -14,7 +16,9 @@ import { OrganizationMember } from './entities';
 
 export class OrganizationMemberService {
   logger = new Logger(OrganizationMemberService.name);
+  private readonly saltRounds = +this.configService.get<number>('SALT_ROUNDS');
   constructor(
+    private configService: ConfigService,
     @InjectRepository(OrganizationMember)
     private repo: Repository<OrganizationMember>,
   ) {}
@@ -68,8 +72,11 @@ export class OrganizationMemberService {
     });
   }
 
-  createOne(dto: CreateOrganizationMemberDto): Promise<OrganizationMember> {
+  async createOne(
+    dto: CreateOrganizationMemberDto,
+  ): Promise<OrganizationMember> {
     dto.organizationId = this.organizationId;
+    dto.password = await bcrypt.hash(dto.password, this.saltRounds);
     // TODO: password hash or invite user
     return this.repo.save(dto);
   }

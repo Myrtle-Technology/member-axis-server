@@ -1,14 +1,20 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Organization } from 'src/organization/entities';
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { PlanPaymentMethod } from '../enums/plan-payment-method';
+import { PlanRenewalDuration } from '../enums/plan-renewal-duration';
 
 @Entity()
-export class Membership extends BaseEntity {
+export class MembershipPlan extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -22,11 +28,11 @@ export class Membership extends BaseEntity {
   membershipFee: number;
 
   @Column({
-    default: 'offline',
-    enum: ['offline', 'online'],
-    enumName: 'PaymentMethod',
+    default: PlanPaymentMethod.offline,
+    enum: Object.values(PlanPaymentMethod),
+    enumName: 'PlanPaymentMethod',
   })
-  paymentMethod: 'offline' | 'online';
+  paymentMethod: PlanPaymentMethod;
 
   @Column({ default: true })
   isPublic: boolean;
@@ -34,8 +40,11 @@ export class Membership extends BaseEntity {
   @Column({ default: false })
   memberCanChangeTo: boolean;
 
-  @Column()
-  renewalDuration: 'never' | 'day' | 'week' | 'month' | 'year' | 'lifetime';
+  @Column({
+    enum: Object.values(PlanRenewalDuration),
+    enumName: 'PlanRenewalDuration',
+  })
+  renewalDuration: PlanRenewalDuration;
 
   @Column({ default: 0, type: 'int' })
   renewalDurationCount: number;
@@ -51,4 +60,12 @@ export class Membership extends BaseEntity {
   @CreateDateColumn() createdAt: Date;
 
   @UpdateDateColumn() updatedAt: Date;
+
+  @Column()
+  organizationId: number;
+
+  @ManyToOne(() => Organization, (org) => org.membershipPlans)
+  @JoinColumn({ name: 'organizationId' })
+  @ApiProperty({ type: () => Organization })
+  organization: Organization;
 }

@@ -33,7 +33,7 @@ export class CommonField extends BaseEntity {
 
   @Column({
     default: 'text',
-    enum: Object.keys(CommonFieldType),
+    enum: Object.values(CommonFieldType),
     enumName: 'CommonFieldType',
   })
   type: CommonFieldType;
