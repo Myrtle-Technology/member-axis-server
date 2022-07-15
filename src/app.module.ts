@@ -17,7 +17,7 @@ import { RoleService } from './role/role.service';
 import { AccessControlModule } from 'nest-access-control';
 import { RolesBuilderFactory } from './role/role.builder';
 import { SmsModule } from './sms/sms.module';
-import { MembershipModule } from './membership/membership.module';
+import { MembershipPlanModule } from './membership-plan/membership-plan.module';
 import { FormModule } from './form/form.module';
 import { InvitationModule } from './invitation/invitation.module';
 import { CommonFieldModule } from './common-field/common-field.module';
@@ -68,7 +68,7 @@ import { FormCommonFieldModule } from './form-common-field/form-common-field.mod
       useFactory: RolesBuilderFactory,
     }),
     SmsModule,
-    MembershipModule,
+    MembershipPlanModule,
     FormModule,
     InvitationModule,
     CommonFieldModule,
