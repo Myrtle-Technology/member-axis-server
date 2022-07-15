@@ -22,8 +22,8 @@ import { CommonField } from './entities/common-field.entity';
 
 @ApiBearerAuth()
 @OrganizationApi()
-@ApiTags('common-field')
-@Controller('common-field')
+@ApiTags('common-fields')
+@Controller('common-fields')
 export class CommonFieldController {
   constructor(private readonly service: CommonFieldService) {}
 
