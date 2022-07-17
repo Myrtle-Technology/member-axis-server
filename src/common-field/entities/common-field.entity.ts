@@ -38,7 +38,7 @@ export class CommonField extends BaseEntity {
   })
   type: CommonFieldType;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'json', nullable: true })
   options: string[];
 
   @Column({ default: false })
