@@ -113,7 +113,7 @@ export class AuthService {
     const organization = await this.organizationService.create(dto);
     const password = await bcrypt.hash(dto.password, this.saltRounds);
     const role = await this.roleService.getDefaultAdminRole();
-    const member = await this.organizationMemberService.create({
+    const member = await this.organizationMemberService.createOne({
       organizationId: organization.id,
       userId: userId,
       roleId: role.id,

@@ -8,20 +8,24 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 
 export enum CommonFieldType {
   text = 'text',
+  password = 'password',
   date = 'date',
   datetime = 'datetime',
   number = 'number',
   boolean = 'boolean',
   select = 'select',
-  checkbox = 'checkbox',
   file = 'file',
+  checkbox = 'checkbox',
+  radio = 'radio',
 }
 
 @Entity()
+@Unique('organization_commonFieldName', ['organizationId', 'name'])
 export class CommonField extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -45,13 +49,13 @@ export class CommonField extends BaseEntity {
   @Column({ default: false })
   required: boolean;
 
-  @Column({ default: 0, type: 'int' })
+  @Column({ default: 10, type: 'int' })
   order: number;
 
   @OneToMany(() => MemberCommonField, (c) => c.commonField)
   members: MemberCommonField[];
 
-  @Column()
+  @Column({ nullable: true })
   formId: number;
 
   @ManyToOne(() => Form, (c) => c.fields)

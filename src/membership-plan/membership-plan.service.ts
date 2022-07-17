@@ -1,7 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CommonField } from 'src/common-field/entities/common-field.entity';
+import {
+  CommonField,
+  CommonFieldType,
+} from 'src/common-field/entities/common-field.entity';
 import { MemberCommonField } from 'src/member-common-field/entities/member-common-field.entity';
+import { OrganizationMember } from 'src/organization-member/entities';
+import * as bcrypt from 'bcrypt';
 import {
   PaginateConfig,
   FilterOperator,
@@ -9,17 +14,22 @@ import {
   Paginated,
   paginate,
 } from 'src/paginator';
+import { User } from 'src/user/entities';
 import { Repository } from 'typeorm';
 import { CreateMembershipPlanDto } from './dto/create-membership-plan.dto';
 import { UpdateMembershipPlanDto } from './dto/update-membership-plan.dto';
 import { MembershipPlan } from './entities/membership-plan.entity';
+import { ConfigService } from '@nestjs/config';
+import { unionBy } from 'lodash';
 
 @Injectable()
 export class MembershipPlanService {
   logger = new Logger(MembershipPlanService.name);
+  private readonly saltRounds = +this.configService.get<number>('SALT_ROUNDS');
   constructor(
     @InjectRepository(MembershipPlan)
     private repo: Repository<MembershipPlan>,
+    private configService: ConfigService,
   ) {}
 
   organizationId: number;
@@ -104,21 +114,98 @@ export class MembershipPlanService {
   }
 
   async getFormFields(): Promise<CommonField[]> {
-    return CommonField.find({ where: { organizationId: this.organizationId } });
+    const fields = [
+      new CommonField({
+        name: 'firstName',
+        type: CommonFieldType.text,
+        required: true,
+        label: 'First Name',
+        order: 0,
+      }),
+      new CommonField({
+        name: 'lastName',
+        type: CommonFieldType.text,
+        required: true,
+        label: 'Last Name',
+        order: 1,
+      }),
+      new CommonField({
+        name: 'phone',
+        type: CommonFieldType.text,
+        required: true,
+        label: 'phone',
+        order: 2,
+      }),
+      new CommonField({
+        name: 'email',
+        type: CommonFieldType.text,
+        required: false,
+        label: 'Email',
+        order: 3,
+      }),
+      new CommonField({
+        name: 'password',
+        type: CommonFieldType.password,
+        required: false,
+        label: 'Password',
+        order: 3,
+      }),
+    ];
+    return unionBy(
+      [
+        ...fields,
+        ...(await CommonField.find({
+          where: { organizationId: this.organizationId },
+          order: { order: 'ASC' },
+        })),
+      ],
+      'name',
+    ).sort((a, b) => a.order - b.order);
   }
 
   async saveFormValue(
     id: number,
-    dto: Partial<MemberCommonField>[],
-  ): Promise<any> {
-    const bulkDto: Partial<MemberCommonField>[] = dto.map((d) => ({
-      ...d,
+    dto: MemberCommonField[],
+  ): Promise<OrganizationMember> {
+    const membershipPlan = await this.repo.findOne(id);
+    if (!membershipPlan) {
+      throw new BadRequestException('Membership plan not found');
+    }
+
+    const defaultFields = dto.filter((d) => !d.id);
+
+    const user = await new User({
+      firstName: defaultFields.find((d) => d.commonField.name === 'firstName')
+        ?.value,
+      lastName: defaultFields.find((d) => d.commonField.name === 'lastName')
+        ?.value,
+      email: defaultFields.find((d) => d.commonField.name === 'email')?.value,
+      phone: defaultFields.find((d) => d.commonField.name === 'phone')?.value,
+    }).save();
+
+    const organizationMember = await new OrganizationMember({
+      userId: user.id,
       organizationId: this.organizationId,
-    }));
-    const otherFields = MemberCommonField.save(bulkDto, {
+      password: await bcrypt.hash(
+        defaultFields.find((d) => d.commonField.name === 'password')?.value,
+        this.saltRounds,
+      ),
+    }).save();
+
+    const commonFields = dto.filter((d) => d.id);
+    const bulkDto: MemberCommonField[] = commonFields.map(
+      (d) =>
+        new MemberCommonField({
+          ...d,
+          organizationMemberId: organizationMember.id,
+          organizationId: this.organizationId,
+        }),
+    );
+
+    await MemberCommonField.save(bulkDto, {
       chunk: 50,
     });
-
-    // create user&member with password and everything;
+    await organizationMember.reload();
+    return organizationMember;
   }
 }

@@ -49,8 +49,8 @@ export class User extends BaseEntity {
   )
   memberOrganizations: OrganizationMember[];
 
-  constructor(permission?: Partial<User>) {
+  constructor(data?: Partial<User>) {
     super();
-    Object.assign(this, permission);
+    if (data) Object.assign(this, data);
   }
 }

@@ -80,6 +80,6 @@ export class OrganizationMember extends BaseEntity {
 
   constructor(member?: Partial<OrganizationMember>) {
     super();
-    Object.assign(this, member);
+    if (member) Object.assign(this, member);
   }
 }
