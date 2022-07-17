@@ -1,3 +1,4 @@
+import { Form } from 'src/form/entities/form.entity';
 import { MemberCommonField } from 'src/member-common-field/entities/member-common-field.entity';
 import { Organization } from 'src/organization/entities';
 import {
@@ -38,7 +39,7 @@ export class CommonField extends BaseEntity {
   })
   type: CommonFieldType;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'json', nullable: true })
   options: string[];
 
   @Column({ default: false })
@@ -50,8 +51,11 @@ export class CommonField extends BaseEntity {
   @OneToMany(() => MemberCommonField, (c) => c.commonField)
   members: MemberCommonField[];
 
-  // @OneToMany(() => FormCommonField, (c) => c.commonField)
-  // forms: FormCommonField[];
+  @Column()
+  formId: number;
+
+  @ManyToOne(() => Form, (c) => c.fields)
+  form: Form;
 
   @Column()
   organizationId: number;

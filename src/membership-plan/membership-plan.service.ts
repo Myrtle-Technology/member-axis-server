@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CommonField } from 'src/common-field/entities/common-field.entity';
+import { MemberCommonField } from 'src/member-common-field/entities/member-common-field.entity';
 import {
   PaginateConfig,
   FilterOperator,
@@ -99,5 +101,24 @@ export class MembershipPlanService {
       organizationId: this.organizationId,
     });
     return true;
+  }
+
+  async getFormFields(): Promise<CommonField[]> {
+    return CommonField.find({ where: { organizationId: this.organizationId } });
+  }
+
+  async saveFormValue(
+    id: number,
+    dto: Partial<MemberCommonField>[],
+  ): Promise<any> {
+    const bulkDto: Partial<MemberCommonField>[] = dto.map((d) => ({
+      ...d,
+      organizationId: this.organizationId,
+    }));
+    const otherFields = MemberCommonField.save(bulkDto, {
+      chunk: 50,
+    });
+
+    // create user&member with password and everything;
   }
 }
