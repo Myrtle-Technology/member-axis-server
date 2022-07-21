@@ -1,1 +1,1 @@
-export const APP_NAME = 'Gemmbrs';
+export const APP_NAME = 'Gembrs';
