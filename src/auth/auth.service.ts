@@ -52,12 +52,12 @@ export class AuthService {
     if (!user) {
       user = await this.userService.createUserByUsername(dto.username);
     }
-    const code = Math.floor(100000 + Math.random() * 900000);
-    const token = await this.createToken(user, code.toString());
     if (isEmail(dto.username)) {
+      const code = Math.floor(100000 + Math.random() * 900000);
+      const token = await this.createToken(user, code.toString());
       await this.mailService.sendVerificationCode(user, token.token);
     } else {
-      await this.smsService.sendOTPLocal(user.phone, token.token);
+      await this.smsService.sendOTP(user.phone);
     }
     return user;
   }
