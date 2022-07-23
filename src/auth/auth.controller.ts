@@ -25,6 +25,7 @@ import { OrganizationApi } from './decorators/organization-api.decorator';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @AllowUserWithoutOrganization()
   @Get('me')
   me(@Request() req: TokenRequest) {
     return req.user;
