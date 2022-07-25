@@ -75,7 +75,7 @@ export class OrganizationMemberService {
   async createOne(
     dto: CreateOrganizationMemberDto,
   ): Promise<OrganizationMember> {
-    dto.organizationId = this.organizationId;
+    dto.organizationId = dto.organizationId || this.organizationId;
     dto.password = await bcrypt.hash(dto.password, this.saltRounds);
     // TODO: password hash or invite user
     return this.repo.save(dto);

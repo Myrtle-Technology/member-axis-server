@@ -111,13 +111,12 @@ export class AuthService {
     dto.ownerId = userId;
     const user = await this.userService.findOne(userId);
     const organization = await this.organizationService.create(dto);
-    const password = await bcrypt.hash(dto.password, this.saltRounds);
     const role = await this.roleService.getDefaultAdminRole();
     const member = await this.organizationMemberService.createOne({
       organizationId: organization.id,
       userId: userId,
       roleId: role.id,
-      password: password,
+      password: dto.password,
       officeTitle: dto.officeTitle,
       contactPhone: user.phone,
     });
