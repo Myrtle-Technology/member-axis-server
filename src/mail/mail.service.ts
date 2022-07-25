@@ -15,7 +15,8 @@ export class MailService {
   ) {}
 
   async welcomeRegisteredOrganization(user: User, organization: Organization) {
-    const url = `${organization.slug}.${this.clientURL}`;
+    const memberUrl = `https://${organization.slug}.${this.clientURL}`;
+    const adminUrl = `${memberUrl}/admin`;
 
     await this.mailerService.send({
       Recipients: { To: [user.email] },
@@ -24,7 +25,8 @@ export class MailService {
         TemplateName: ElasticMailTemplateNames.WelcomeToGembrs,
         Merge: {
           name: `${user.firstName}`,
-          url,
+          memberUrl,
+          adminUrl,
           APP_NAME,
           organization: `${organization.name}`,
         },

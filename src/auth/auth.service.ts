@@ -26,6 +26,8 @@ import { TokenRequest } from './interfaces/token-request.interface';
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
   private readonly saltRounds = +this.configService.get<number>('SALT_ROUNDS');
+  private readonly isDevServer: boolean =
+    this.configService.get<boolean>('IS_DEV_SERVER');
   constructor(
     @Inject(REQUEST) private request: TokenRequest,
     private mailService: MailService,
@@ -52,6 +54,9 @@ export class AuthService {
     if (!user) {
       user = await this.userService.createUserByUsername(dto.username);
     }
+    if (this.isDevServer) {
+      return user;
+    }
     if (isEmail(dto.username)) {
       const code = Math.floor(100000 + Math.random() * 900000);
       const token = await this.createToken(user, code.toString());
@@ -77,16 +82,18 @@ export class AuthService {
 
   async validateOTP(dto: VerifyOtpDto) {
     const user = await this.userService.getUserByUsername(dto.username);
-    if (isEmail(dto.username)) {
-      const token = await Token.findOne({
-        where: { token: dto.otp.toString(), userId: user.id },
-      });
-      if (!token) {
-        throw new BadRequestException(`OTP is invalid`);
+    if (this.isDevServer) {
+      if (isEmail(dto.username)) {
+        const token = await Token.findOne({
+          where: { token: dto.otp.toString(), userId: user.id },
+        });
+        if (!token) {
+          throw new BadRequestException(`OTP is invalid`);
+        }
+        await token.remove();
+      } else {
+        this.smsService.verifyOTP(user.phone, dto.otp.toString());
       }
-      await token.remove();
-    } else {
-      this.smsService.verifyOTP(user.phone, dto.otp.toString());
     }
     user.verified = true;
     await user.save();
@@ -121,9 +128,8 @@ export class AuthService {
       contactPhone: user.phone,
     });
     delete member.password;
-    // TODO: send a welcome Email to user
     this.mailService.welcomeRegisteredOrganization(user, organization);
-    return member;
+    return { ...member, organization, user, role };
   }
 
   async validateOrganizationMember(dto: LoginDto) {
