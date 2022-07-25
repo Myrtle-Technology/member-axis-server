@@ -26,8 +26,8 @@ import { TokenRequest } from './interfaces/token-request.interface';
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
   private readonly saltRounds = +this.configService.get<number>('SALT_ROUNDS');
-  private readonly isDevServer: boolean =
-    this.configService.get<boolean>('IS_DEV_SERVER');
+  private readonly isDevServer: string =
+    this.configService.get<string>('IS_DEV_SERVER');
   constructor(
     @Inject(REQUEST) private request: TokenRequest,
     private mailService: MailService,
@@ -54,15 +54,14 @@ export class AuthService {
     if (!user) {
       user = await this.userService.createUserByUsername(dto.username);
     }
-    if (this.isDevServer) {
-      return user;
-    }
-    if (isEmail(dto.username)) {
-      const code = Math.floor(100000 + Math.random() * 900000);
-      const token = await this.createToken(user, code.toString());
-      await this.mailService.sendVerificationCode(user, token.token);
-    } else {
-      await this.smsService.sendOTP(user.phone);
+    if (!(this.isDevServer == 'true')) {
+      if (isEmail(dto.username)) {
+        const code = Math.floor(100000 + Math.random() * 900000);
+        const token = await this.createToken(user, code.toString());
+        await this.mailService.sendVerificationCode(user, token.token);
+      } else {
+        await this.smsService.sendOTP(user.phone);
+      }
     }
     return user;
   }
@@ -82,7 +81,7 @@ export class AuthService {
 
   async validateOTP(dto: VerifyOtpDto) {
     const user = await this.userService.getUserByUsername(dto.username);
-    if (this.isDevServer) {
+    if (!(this.isDevServer == 'true')) {
       if (isEmail(dto.username)) {
         const token = await Token.findOne({
           where: { token: dto.otp.toString(), userId: user.id },
