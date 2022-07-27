@@ -9,7 +9,7 @@ import {
   Paginated,
   PaginateQuery,
 } from 'src/paginator';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository, SaveOptions } from 'typeorm';
 import { CreateOrganizationMemberDto } from './dto/create-organization-member.dto';
 import { UpdateOrganizationMemberDto } from './dto/update-organization-member.dto';
 import { OrganizationMember } from './entities';
@@ -25,9 +25,20 @@ export class OrganizationMemberService {
 
   organizationId: number;
 
-  find = this.repo.find;
-  findOne = this.repo.findOne;
-  create = this.repo.create;
+  find(options?: FindManyOptions<OrganizationMember>) {
+    return this.repo.find(options);
+  }
+  findOne(options?: FindManyOptions<OrganizationMember>) {
+    return this.repo.findOne(options);
+  }
+  create(
+    entities: OrganizationMember,
+    options?: SaveOptions & {
+      reload: false;
+    },
+  ) {
+    return this.repo.save(entities, options);
+  }
 
   config(organizationId: number): PaginateConfig<OrganizationMember> {
     return {

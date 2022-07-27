@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, Scope, Inject } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Scope,
+  Inject,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 import { User } from 'src/user/entities';
@@ -136,6 +142,11 @@ export class AuthService {
     const organizationSlug = this.request.headers[
       ORGANIZATION_API_HEADER
     ] as string;
+    if (!organizationSlug) {
+      throw new BadRequestException(
+        'Please specify the organization you want to login to',
+      );
+    }
     const organization = await this.organizationService.getOrganizationBySlug(
       organizationSlug,
     );
@@ -143,7 +154,7 @@ export class AuthService {
       where: { userId: user.id, organizationId: organization.id },
     });
     if (!member) {
-      throw new BadRequestException(
+      throw new UnauthorizedException(
         `You are not a member of this organization`,
       );
     }
