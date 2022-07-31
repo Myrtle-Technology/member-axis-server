@@ -44,7 +44,7 @@ export class OrganizationMember extends BaseEntity {
   @Column()
   roleId: number;
 
-  @ManyToOne(() => Role, (role) => role.organizationMembers)
+  @ManyToOne(() => Role, (role) => role.organizationMembers, { eager: true })
   @JoinColumn({ name: 'roleId' })
   @ApiProperty({ type: () => Role })
   role: Role;

@@ -110,6 +110,7 @@ export class OrganizationMemberService {
     await this.repo.update({ id, organizationId: this.organizationId }, dto);
     return this.repo.findOne(id);
   }
+
   async deleteOne(id: number): Promise<boolean> {
     await this.repo.delete({
       id,
