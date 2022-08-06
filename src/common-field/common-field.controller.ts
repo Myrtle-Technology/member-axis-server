@@ -29,26 +29,32 @@ export class CommonFieldController {
 
   @Get()
   @PaginateQueryOptions()
-  @Permit(
-    { resource: Resources.Member, action: 'read', possession: 'own' },
-    { resource: Resources.Member, action: 'read', possession: 'any' },
-  )
+  @Permit({
+    resource: Resources.CommonField,
+    action: 'read',
+    possession: 'own',
+  })
   getMany(@Request() request: TokenRequest, @Paginate() query: PaginateQuery) {
     this.service.organizationId = request.tokenData.organizationId;
     return this.service.getMany(query);
   }
   @Get(':id')
-  @Permit(
-    { resource: Resources.Member, action: 'read', possession: 'own' },
-    { resource: Resources.Member, action: 'read', possession: 'any' },
-  )
+  @Permit({
+    resource: Resources.CommonField,
+    action: 'read',
+    possession: 'own',
+  })
   getOne(@Request() request: TokenRequest, @Param('id') id: number) {
     this.service.organizationId = request.tokenData.organizationId;
     return this.service.getOne(+id);
   }
 
   @Post()
-  @Permit({ resource: Resources.Member, action: 'create', possession: 'own' })
+  @Permit({
+    resource: Resources.CommonField,
+    action: 'create',
+    possession: 'own',
+  })
   createOne(
     @Request() request: TokenRequest,
     @Body() dto: CreateCommonFieldDto,
@@ -58,7 +64,11 @@ export class CommonFieldController {
   }
 
   @Post('bulk')
-  @Permit({ resource: Resources.Member, action: 'create', possession: 'own' })
+  @Permit({
+    resource: Resources.CommonField,
+    action: 'create',
+    possession: 'own',
+  })
   createMany(
     @Request() request: TokenRequest,
     @Body() dto: CreateCommonFieldDto[],
@@ -68,7 +78,11 @@ export class CommonFieldController {
   }
 
   @Patch(':id')
-  @Permit({ resource: Resources.Member, action: 'update', possession: 'own' })
+  @Permit({
+    resource: Resources.CommonField,
+    action: 'update',
+    possession: 'own',
+  })
   updateOne(
     @Request() request: TokenRequest,
     @Param('id') id: number,
@@ -79,7 +93,11 @@ export class CommonFieldController {
   }
 
   @Delete(':id')
-  @Permit({ resource: Resources.Member, action: 'delete', possession: 'own' })
+  @Permit({
+    resource: Resources.CommonField,
+    action: 'delete',
+    possession: 'own',
+  })
   async deleteOne(
     @Request() request: TokenRequest,
     @Param('id') id: number,

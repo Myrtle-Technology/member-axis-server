@@ -63,16 +63,21 @@ export async function RolesBuilderFactory(
 }
 
 /** Members */
-rolesBuilder.grant(RoleEnum.Member).readAny(Resources.MembershipPlan);
+rolesBuilder
+  .grant(RoleEnum.Member)
+  .readOwn(Resources.User)
+  .deleteOwn(Resources.User)
+  .updateOwn(Resources.User)
+  .readAny(Resources.MembershipPlan);
 
 /** Admin */
 rolesBuilder
   .grant(RoleEnum.Admin)
   // .extend(RoleEnum.Member) replaced with block
-  .readOwn(Resources.Member)
-  .createOwn(Resources.Member)
-  .deleteOwn(Resources.Member)
-  .updateOwn(Resources.Member)
+  .readOwn(Resources.User)
+  .createOwn(Resources.User)
+  .deleteOwn(Resources.User)
+  .updateOwn(Resources.User)
   .readAny(Resources.MembershipPlan)
   // members
   .readOwn(Resources.OrganizationMember)

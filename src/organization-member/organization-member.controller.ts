@@ -29,26 +29,32 @@ export class OrganizationMemberController {
 
   @Get()
   @PaginateQueryOptions()
-  @Permit(
-    { resource: Resources.Member, action: 'read', possession: 'own' },
-    { resource: Resources.Member, action: 'read', possession: 'any' },
-  )
+  @Permit({
+    resource: Resources.OrganizationMember,
+    action: 'read',
+    possession: 'own',
+  })
   getMany(@Request() request: TokenRequest, @Paginate() query: PaginateQuery) {
     this.service.organizationId = request.tokenData.organizationId;
     return this.service.getMany(query);
   }
   @Get(':id')
-  @Permit(
-    { resource: Resources.Member, action: 'read', possession: 'own' },
-    { resource: Resources.Member, action: 'read', possession: 'any' },
-  )
+  @Permit({
+    resource: Resources.OrganizationMember,
+    action: 'read',
+    possession: 'own',
+  })
   getOne(@Request() request: TokenRequest, @Param('id') id: number) {
     this.service.organizationId = request.tokenData.organizationId;
     return this.service.getOne(+id);
   }
 
   @Post()
-  @Permit({ resource: Resources.Member, action: 'create', possession: 'own' })
+  @Permit({
+    resource: Resources.OrganizationMember,
+    action: 'create',
+    possession: 'own',
+  })
   createOne(
     @Request() request: TokenRequest,
     @Body() dto: CreateOrganizationMemberDto,
@@ -58,7 +64,11 @@ export class OrganizationMemberController {
   }
 
   @Post('bulk')
-  @Permit({ resource: Resources.Member, action: 'create', possession: 'own' })
+  @Permit({
+    resource: Resources.OrganizationMember,
+    action: 'create',
+    possession: 'own',
+  })
   createMany(
     @Request() request: TokenRequest,
     @Body() dto: CreateOrganizationMemberDto[],
@@ -68,7 +78,11 @@ export class OrganizationMemberController {
   }
 
   @Patch(':id')
-  @Permit({ resource: Resources.Member, action: 'update', possession: 'own' })
+  @Permit({
+    resource: Resources.OrganizationMember,
+    action: 'update',
+    possession: 'own',
+  })
   updateOne(
     @Request() request: TokenRequest,
     @Param('id') id: number,
@@ -79,7 +93,11 @@ export class OrganizationMemberController {
   }
 
   @Delete(':id')
-  @Permit({ resource: Resources.Member, action: 'delete', possession: 'own' })
+  @Permit({
+    resource: Resources.OrganizationMember,
+    action: 'delete',
+    possession: 'own',
+  })
   async deleteOne(
     @Request() request: TokenRequest,
     @Param('id') id: number,

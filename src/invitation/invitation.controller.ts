@@ -1,8 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { InvitationService } from './invitation.service';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { UpdateInvitationDto } from './dto/update-invitation.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('invitation')
 @Controller('invitation')
 export class InvitationController {
   constructor(private readonly invitationService: InvitationService) {}
@@ -23,7 +33,10 @@ export class InvitationController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateInvitationDto: UpdateInvitationDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateInvitationDto: UpdateInvitationDto,
+  ) {
     return this.invitationService.update(+id, updateInvitationDto);
   }
 

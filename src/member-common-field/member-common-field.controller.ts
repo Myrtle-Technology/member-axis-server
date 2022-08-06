@@ -1,11 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { MemberCommonFieldService } from './member-common-field.service';
 import { CreateMemberCommonFieldDto } from './dto/create-member-common-field.dto';
 import { UpdateMemberCommonFieldDto } from './dto/update-member-common-field.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('member-common-field')
 @Controller('member-common-field')
 export class MemberCommonFieldController {
-  constructor(private readonly memberCommonFieldService: MemberCommonFieldService) {}
+  constructor(
+    private readonly memberCommonFieldService: MemberCommonFieldService,
+  ) {}
 
   @Post()
   create(@Body() createMemberCommonFieldDto: CreateMemberCommonFieldDto) {
@@ -23,8 +35,14 @@ export class MemberCommonFieldController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMemberCommonFieldDto: UpdateMemberCommonFieldDto) {
-    return this.memberCommonFieldService.update(+id, updateMemberCommonFieldDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateMemberCommonFieldDto: UpdateMemberCommonFieldDto,
+  ) {
+    return this.memberCommonFieldService.update(
+      +id,
+      updateMemberCommonFieldDto,
+    );
   }
 
   @Delete(':id')

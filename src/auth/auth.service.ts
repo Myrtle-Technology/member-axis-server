@@ -4,6 +4,7 @@ import {
   Scope,
   Inject,
   UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { UpdateUserDto } from 'src/user/dto/update-user.dto';
@@ -150,16 +151,23 @@ export class AuthService {
     const organization = await this.organizationService.getOrganizationBySlug(
       organizationSlug,
     );
+
+    if (!organization) {
+      throw new NotFoundException(
+        `We do not have an organization with the slug=(${organizationSlug})`,
+      );
+    }
+
     const member = await OrganizationMember.findOne({
       where: { userId: user.id, organizationId: organization.id },
     });
     if (!member) {
       throw new UnauthorizedException(
-        `You are not a member of this organization`,
+        `You are not a member of this organization, try joining the organization first.`,
       );
     }
-    const passwordMatch = await bcrypt.compare(dto.password, member.password);
 
+    const passwordMatch = await bcrypt.compare(dto.password, member.password);
     if (passwordMatch) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = member;
