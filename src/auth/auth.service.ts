@@ -117,7 +117,7 @@ export class AuthService {
 
   async updatePersonalDetails(userId: number, dto: UpdateUserDto) {
     // TODO: send a welcome Email to user
-    return this.userService.update(userId, dto);
+    return this.userService.updateOne(userId, dto);
   }
 
   async createOrganization(userId: number, dto: CreateOrganizationPasswordDto) {

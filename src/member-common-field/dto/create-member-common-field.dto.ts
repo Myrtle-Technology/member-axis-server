@@ -1,1 +1,3 @@
-export class CreateMemberCommonFieldDto {}
+export class CreateMemberCommonFieldDto {
+  organizationId: number;
+}

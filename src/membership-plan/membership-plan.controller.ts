@@ -38,6 +38,7 @@ export class MembershipPlanController {
     this.service.organizationId = request.tokenData.organizationId;
     return this.service.getMany(query);
   }
+
   @Get(':id')
   @Permit({
     resource: Resources.MembershipPlan,
@@ -63,21 +64,8 @@ export class MembershipPlanController {
     return this.service.createOne(dto);
   }
 
-  @Post('bulk')
-  @Permit({
-    resource: Resources.MembershipPlan,
-    action: 'create',
-    possession: 'own',
-  })
-  createMany(
-    @Request() request: TokenRequest,
-    @Body() dto: CreateMembershipPlanDto[],
-  ): Promise<MembershipPlan[]> {
-    this.service.organizationId = request.tokenData.organizationId;
-    return this.service.createMany(dto);
-  }
-
   @Patch(':id')
+  @ApiBearerAuth()
   @Permit({
     resource: Resources.MembershipPlan,
     action: 'update',
@@ -93,6 +81,7 @@ export class MembershipPlanController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
   @Permit({
     resource: Resources.MembershipPlan,
     action: 'delete',

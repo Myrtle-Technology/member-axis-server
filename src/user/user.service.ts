@@ -1,14 +1,14 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TypeOrmCrudService } from '@rewiko/crud-typeorm';
 import { isEmail, isPhoneNumber } from 'class-validator';
+import { SharedService } from 'src/shared/shared.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities';
 
 @Injectable()
-export class UserService extends TypeOrmCrudService<User> {
+export class UserService extends SharedService<User> {
   logger = new Logger(UserService.name);
   saltRounds = +this.configService.get<number>('SALT_ROUNDS');
   constructor(
@@ -18,13 +18,13 @@ export class UserService extends TypeOrmCrudService<User> {
     super(repo);
   }
 
-  async update(userId: number, dto: UpdateUserDto) {
+  async updateOne(userId: number, dto: UpdateUserDto) {
     delete dto.verified; // verification can only happen via auth verifyOTP route
     await this.repo.update(userId, dto);
     return this.findOne(userId);
   }
 
-  async create(dto: CreateUserDto) {
+  async createOne(dto: CreateUserDto) {
     return this.repo.save(dto);
   }
 
@@ -50,7 +50,7 @@ export class UserService extends TypeOrmCrudService<User> {
       user = await this.create({ phone: username });
     }
     if (isEmail(username)) {
-      user = await this.create({
+      user = await this.createOne({
         firstName: null,
         email: username,
         lastName: null,

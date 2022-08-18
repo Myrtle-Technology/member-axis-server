@@ -9,36 +9,39 @@ import {
   Paginated,
   PaginateQuery,
 } from 'src/paginator';
+import { SharedService } from 'src/shared/shared.service';
 import { FindManyOptions, Repository, SaveOptions } from 'typeorm';
 import { CreateOrganizationMemberDto } from './dto/create-organization-member.dto';
 import { UpdateOrganizationMemberDto } from './dto/update-organization-member.dto';
 import { OrganizationMember } from './entities';
 
-export class OrganizationMemberService {
+export class OrganizationMemberService extends SharedService<OrganizationMember> {
   logger = new Logger(OrganizationMemberService.name);
   private readonly saltRounds = +this.configService.get<number>('SALT_ROUNDS');
   constructor(
-    private configService: ConfigService,
     @InjectRepository(OrganizationMember)
-    private repo: Repository<OrganizationMember>,
-  ) {}
+    repo: Repository<OrganizationMember>,
+    private configService: ConfigService,
+  ) {
+    super(repo);
+  }
 
   organizationId: number;
 
-  find(options?: FindManyOptions<OrganizationMember>) {
-    return this.repo.find(options);
-  }
-  findOne(options?: FindManyOptions<OrganizationMember>) {
-    return this.repo.findOne(options);
-  }
-  create(
-    entities: OrganizationMember,
-    options?: SaveOptions & {
-      reload: false;
-    },
-  ) {
-    return this.repo.save(entities, options);
-  }
+  // find(options?: FindManyOptions<OrganizationMember>) {
+  //   return this.repo.find(options);
+  // }
+  // findOne(options?: FindManyOptions<OrganizationMember>) {
+  //   return this.repo.findOne(options);
+  // }
+  // create(
+  //   entities: OrganizationMember,
+  //   options?: SaveOptions & {
+  //     reload: false;
+  //   },
+  // ) {
+  //   return this.repo.save(entities, options);
+  // }
 
   config(organizationId: number): PaginateConfig<OrganizationMember> {
     return {
@@ -80,6 +83,20 @@ export class OrganizationMemberService {
     return this.repo.findOne({
       where: { id, organizationId: this.organizationId },
       relations: ['role', 'organization', 'user'],
+      select: [
+        'id',
+        'organizationId',
+        'organization',
+        'userId',
+        'user',
+        'roleId',
+        'role',
+        'bio',
+        'contactPhone',
+        'officeTitle',
+        'createdAt',
+        'updatedAt',
+      ],
     });
   }
 

@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   CommonField,
@@ -15,28 +20,71 @@ import {
   paginate,
 } from 'src/paginator';
 import { User } from 'src/user/entities';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { CreateMembershipPlanDto } from './dto/create-membership-plan.dto';
 import { UpdateMembershipPlanDto } from './dto/update-membership-plan.dto';
 import { MembershipPlan } from './entities/membership-plan.entity';
 import { ConfigService } from '@nestjs/config';
 import { unionBy } from 'lodash';
+import { SharedService } from 'src/shared/shared.service';
+import { UserService } from 'src/user/user.service';
+import { OrganizationMemberService } from 'src/organization-member/organization-member.service';
+import { MemberCommonFieldService } from 'src/member-common-field/member-common-field.service';
 
 @Injectable()
-export class MembershipPlanService {
+export class MembershipPlanService extends SharedService<MembershipPlan> {
   logger = new Logger(MembershipPlanService.name);
   private readonly saltRounds = +this.configService.get<number>('SALT_ROUNDS');
   constructor(
     @InjectRepository(MembershipPlan)
-    private repo: Repository<MembershipPlan>,
+    public repo: Repository<MembershipPlan>,
+    public memberCommonFieldService: MemberCommonFieldService,
+    public userService: UserService,
+    public organizationMemberService: OrganizationMemberService,
     private configService: ConfigService,
-  ) {}
+  ) {
+    super(repo);
+  }
 
-  organizationId: number;
+  public organizationId: number;
 
-  find = this.repo.find;
-  findOne = this.repo.findOne;
-  create = this.repo.create;
+  public fields = [
+    new CommonField({
+      name: 'firstName',
+      type: CommonFieldType.text,
+      required: true,
+      label: 'First Name',
+      order: 0,
+    }),
+    new CommonField({
+      name: 'lastName',
+      type: CommonFieldType.text,
+      required: true,
+      label: 'Last Name',
+      order: 1,
+    }),
+    new CommonField({
+      name: 'phone',
+      type: CommonFieldType.text,
+      required: true,
+      label: 'phone',
+      order: 2,
+    }),
+    new CommonField({
+      name: 'email',
+      type: CommonFieldType.text,
+      required: false,
+      label: 'Email',
+      order: 3,
+    }),
+    new CommonField({
+      name: 'password',
+      type: CommonFieldType.password,
+      required: false,
+      label: 'Password',
+      order: 3,
+    }),
+  ];
 
   config(organizationId: number): PaginateConfig<MembershipPlan> {
     return {
@@ -48,7 +96,7 @@ export class MembershipPlanService {
         'membershipFee',
         'paymentMethod',
         'isPublic',
-        'memberCanChangeTo',
+        // 'memberCanChangeTo',
         'renewalDuration',
         'renewalDurationCount',
         'approveApplication',
@@ -83,26 +131,48 @@ export class MembershipPlanService {
     });
   }
 
-  createOne(dto: CreateMembershipPlanDto): Promise<MembershipPlan> {
+  async createOne(dto: CreateMembershipPlanDto) {
     dto.organizationId = this.organizationId;
-    return this.repo.save(dto);
-  }
-
-  createMany(bulkDto: CreateMembershipPlanDto[]): Promise<MembershipPlan[]> {
-    return this.repo.save(
-      bulkDto.map((dto) => ({
-        ...dto,
-        organizationId: this.organizationId,
-      })),
-    );
+    const plansMemberCanChangeTo = await this.repo.find({
+      where: { id: In(dto.memberCanChangeTo) },
+    });
+    delete dto.memberCanChangeTo;
+    const nDto: Omit<CreateMembershipPlanDto, 'memberCanChangeTo'> = dto;
+    const currentPlan = await this.repo.save({
+      ...nDto,
+      changeableTo: plansMemberCanChangeTo,
+    });
+    currentPlan.reload();
+    return currentPlan;
   }
 
   async updateOne(
     id: number,
     dto: UpdateMembershipPlanDto,
   ): Promise<MembershipPlan> {
-    await this.repo.update({ id, organizationId: this.organizationId }, dto);
-    return this.repo.findOne(id);
+    const currentPlan = await this.repo.findOne({
+      id,
+      organizationId: this.organizationId,
+    });
+    if (!currentPlan) {
+      throw new NotFoundException(
+        'The specified membership level was not found',
+      );
+    }
+
+    const plansMemberCanChangeTo = await this.repo.find({
+      where: { id: In(dto.memberCanChangeTo) },
+    });
+    delete dto.memberCanChangeTo;
+    const nDto: Omit<UpdateMembershipPlanDto, 'memberCanChangeTo'> = dto;
+    // update current plan
+    await this.repo.update(
+      { id: currentPlan.id, organizationId: this.organizationId },
+      { ...nDto, changeableTo: plansMemberCanChangeTo },
+    );
+
+    currentPlan.reload();
+    return currentPlan;
   }
 
   async deleteOne(id: number): Promise<boolean> {
@@ -114,46 +184,9 @@ export class MembershipPlanService {
   }
 
   async getFormFields(): Promise<CommonField[]> {
-    const fields = [
-      new CommonField({
-        name: 'firstName',
-        type: CommonFieldType.text,
-        required: true,
-        label: 'First Name',
-        order: 0,
-      }),
-      new CommonField({
-        name: 'lastName',
-        type: CommonFieldType.text,
-        required: true,
-        label: 'Last Name',
-        order: 1,
-      }),
-      new CommonField({
-        name: 'phone',
-        type: CommonFieldType.text,
-        required: true,
-        label: 'phone',
-        order: 2,
-      }),
-      new CommonField({
-        name: 'email',
-        type: CommonFieldType.text,
-        required: false,
-        label: 'Email',
-        order: 3,
-      }),
-      new CommonField({
-        name: 'password',
-        type: CommonFieldType.password,
-        required: false,
-        label: 'Password',
-        order: 3,
-      }),
-    ];
     return unionBy(
       [
-        ...fields,
+        ...this.fields,
         ...(await CommonField.find({
           where: { organizationId: this.organizationId },
           order: { order: 'ASC' },
@@ -174,37 +207,40 @@ export class MembershipPlanService {
 
     const defaultFields = dto.filter((d) => !d.id);
 
-    const user = await new User({
-      firstName: defaultFields.find((d) => d.commonField.name === 'firstName')
-        ?.value,
-      lastName: defaultFields.find((d) => d.commonField.name === 'lastName')
-        ?.value,
-      email: defaultFields.find((d) => d.commonField.name === 'email')?.value,
-      phone: defaultFields.find((d) => d.commonField.name === 'phone')?.value,
-    }).save();
+    const user = await this.userService.createOne(
+      new User({
+        firstName: defaultFields.find((d) => d.commonField.name === 'firstName')
+          ?.value,
+        lastName: defaultFields.find((d) => d.commonField.name === 'lastName')
+          ?.value,
+        email: defaultFields.find((d) => d.commonField.name === 'email')?.value,
+        phone: defaultFields.find((d) => d.commonField.name === 'phone')?.value,
+      }),
+    );
 
-    const organizationMember = await new OrganizationMember({
-      userId: user.id,
-      organizationId: this.organizationId,
-      password: await bcrypt.hash(
-        defaultFields.find((d) => d.commonField.name === 'password')?.value,
-        this.saltRounds,
-      ),
-    }).save();
+    const organizationMember = await this.organizationMemberService.createOne(
+      new OrganizationMember({
+        userId: user.id,
+        organizationId: this.organizationId,
+        password: await bcrypt.hash(
+          defaultFields.find((d) => d.commonField.name === 'password')?.value,
+          this.saltRounds,
+        ),
+      }),
+    );
 
+    // get all fields that are not default fields
     const commonFields = dto.filter((d) => d.id);
     const bulkDto: MemberCommonField[] = commonFields.map(
-      (d) =>
+      (commonField) =>
         new MemberCommonField({
-          ...d,
+          ...commonField,
           organizationMemberId: organizationMember.id,
           organizationId: this.organizationId,
         }),
     );
 
-    await MemberCommonField.save(bulkDto, {
-      chunk: 50,
-    });
+    await this.memberCommonFieldService.createMany(bulkDto);
     await organizationMember.reload();
     return organizationMember;
   }

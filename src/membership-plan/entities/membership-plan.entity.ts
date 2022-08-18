@@ -6,6 +6,8 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -37,8 +39,9 @@ export class MembershipPlan extends BaseEntity {
   @Column({ default: true })
   isPublic: boolean;
 
-  @Column({ default: false })
-  memberCanChangeTo: boolean;
+  @ManyToMany(() => MembershipPlan)
+  @JoinTable()
+  changeableTo: MembershipPlan[];
 
   @Column({
     default: PlanRenewalDuration.never,
@@ -70,3 +73,10 @@ export class MembershipPlan extends BaseEntity {
   @ApiProperty({ type: () => Organization })
   organization: Organization;
 }
+
+/*
+Reminders:
+n days before renewal date (twice 14, 7)
+n days after renewal date (twice 7, 1)
+on renewal date
+*/
