@@ -11,8 +11,6 @@ import { UserModule } from 'src/user/user.module';
   imports: [
     TypeOrmModule.forFeature([MembershipPlan]),
     MemberCommonFieldModule,
-    OrganizationMemberModule,
-    UserModule,
   ],
   controllers: [MembershipPlanController],
   providers: [MembershipPlanService],

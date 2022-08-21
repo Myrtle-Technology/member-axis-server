@@ -13,6 +13,8 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { RoleModule } from 'src/role/role.module';
 import { SmsModule } from 'src/sms/sms.module';
 import { ConfigModule } from '@nestjs/config';
+import { MemberCommonFieldModule } from 'src/member-common-field/member-common-field.module';
+import { MembershipPlanModule } from 'src/membership-plan/membership-plan.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { ConfigModule } from '@nestjs/config';
     RoleModule,
     OrganizationModule,
     OrganizationMemberModule,
+    MemberCommonFieldModule,
+    MembershipPlanModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, LocalStrategy],

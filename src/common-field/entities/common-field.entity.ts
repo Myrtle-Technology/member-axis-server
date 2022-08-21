@@ -13,6 +13,7 @@ import {
 
 export enum CommonFieldType {
   text = 'text',
+  email = 'email',
   password = 'password',
   date = 'date',
   datetime = 'datetime',
@@ -23,6 +24,12 @@ export enum CommonFieldType {
   checkbox = 'checkbox',
   radio = 'radio',
 }
+export type CommonFieldOptions =
+  | {
+      label: string;
+      value: any;
+    }[]
+  | string[];
 
 @Entity()
 @Unique('organization_commonFieldName', ['organizationId', 'name'])
@@ -44,7 +51,7 @@ export class CommonField extends BaseEntity {
   type: CommonFieldType;
 
   @Column({ type: 'json', nullable: true })
-  options: string[];
+  options: CommonFieldOptions;
 
   @Column({ default: false })
   required: boolean;

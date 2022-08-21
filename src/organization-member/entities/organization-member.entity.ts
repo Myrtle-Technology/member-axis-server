@@ -52,6 +52,9 @@ export class OrganizationMember extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   bio: string;
 
+  /**
+   * Phone number for public access
+   */
   @IsPhoneNumber()
   @Column({ nullable: true })
   contactPhone: string;

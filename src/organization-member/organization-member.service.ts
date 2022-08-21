@@ -10,7 +10,7 @@ import {
   PaginateQuery,
 } from 'src/paginator';
 import { SharedService } from 'src/shared/shared.service';
-import { FindManyOptions, Repository, SaveOptions } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateOrganizationMemberDto } from './dto/create-organization-member.dto';
 import { UpdateOrganizationMemberDto } from './dto/update-organization-member.dto';
 import { OrganizationMember } from './entities';

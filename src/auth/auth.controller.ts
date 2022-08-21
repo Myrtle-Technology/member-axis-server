@@ -19,6 +19,8 @@ import { CreateOrganizationPasswordDto } from './dto/create-organization-passwor
 import { TokenRequest } from './interfaces/token-request.interface';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { OrganizationApi } from './decorators/organization-api.decorator';
+import { CreateAccountDto } from './dto/create-account.dto';
+import { RegisterOrganizationMember } from './dto/register-organization-member.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -81,5 +83,21 @@ export class AuthController {
     @Body() dto: FindUserOrganization,
   ) {
     return this.authService.findUserOrganizations(dto);
+  }
+
+  @AllowUserWithoutOrganization()
+  @Post('create-account')
+  createNewAccount(
+    @Request() req: TokenRequest,
+    @Body() dto: CreateAccountDto,
+  ) {
+    return this.authService.createNewAccount(req.tokenData.userId, dto);
+  }
+
+  @Public()
+  @OrganizationApi()
+  @Post('register-member')
+  registerOrganizationMember(@Body() dto: RegisterOrganizationMember) {
+    return this.authService.registerOrganizationMember(dto);
   }
 }

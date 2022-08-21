@@ -9,6 +9,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -40,7 +41,7 @@ export class MembershipPlan extends BaseEntity {
   isPublic: boolean;
 
   @ManyToMany(() => MembershipPlan)
-  @JoinTable()
+  @JoinTable({ joinColumn: { name: 'membershipPlanId_1' } })
   changeableTo: MembershipPlan[];
 
   @Column({

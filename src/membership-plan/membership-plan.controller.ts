@@ -19,6 +19,7 @@ import { PaginateQueryOptions } from 'src/paginator/paginate-query-options.decor
 import { Permit } from 'src/role/decorators/permit.decorator';
 import { Resources } from 'src/role/enums/resources.enum';
 import { MembershipPlan } from './entities/membership-plan.entity';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @ApiBearerAuth()
 @OrganizationApi()

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ExecutionContext,
   Injectable,
   UnauthorizedException,
@@ -6,12 +7,20 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
+import { OrganizationService } from 'src/organization/organization.service';
 import { USER_WITHOUT_ORGANIZATION } from '../decorators/allow-user-without-organization.decorator';
+import { ORGANIZATION_API_HEADER } from '../decorators/organization-api.decorator';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { TokenData } from '../dto/token-data.dto';
+import { TokenRequest } from '../interfaces/token-request.interface';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(protected reflector: Reflector, private jwtService: JwtService) {
+  constructor(
+    protected reflector: Reflector,
+    private jwtService: JwtService,
+    private organizationService: OrganizationService,
+  ) {
     super();
   }
 
@@ -20,17 +29,32 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       context.getHandler(),
       context.getClass(),
     ]);
+    const request: TokenRequest = context.switchToHttp().getRequest();
     if (isPublic) {
-      return true;
+      const organizationSlug = request.headers[
+        ORGANIZATION_API_HEADER
+      ] as string;
+      if (organizationSlug !== 'gembrs' && !organizationSlug) {
+        throw new BadRequestException(
+          'Please specify the organization you want to access',
+        );
+      }
+      return this.organizationService
+        .findOne({
+          slug: organizationSlug,
+        })
+        .then((organization) => {
+          request.organizationId = organization.id;
+          return !!organization;
+        });
     }
-    const request = context.switchToHttp().getRequest();
     const bearerToken: string[] = (request.headers.authorization || '').split(
       ' ',
     );
     if (bearerToken.length > 1) {
       request.tokenData = this.jwtService.decode(
         request.headers.authorization.split(' ')[1],
-      );
+      ) as TokenData;
     }
     // check if not authentication route
     const allowUserWithoutOrganization =
