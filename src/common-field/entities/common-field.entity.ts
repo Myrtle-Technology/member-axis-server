@@ -12,17 +12,14 @@ import {
   Unique,
 } from 'typeorm';
 import { CommonFieldType } from '../enums/common-field-type.enum';
+import { CommonFieldOption } from '../dto/common-field-option.dto';
+import { CommonFieldAttributes } from '../dto/common-field-attributes.dto';
 
 export enum CommonFieldPrivacy {
   NotVisible = 'not-visible',
   VisibleToMembers = 'visible-to-members',
   VisibleToPublic = 'visible-to-public',
 }
-export class CommonFieldOption {
-  label: string;
-  value: any;
-}
-
 @Entity()
 @Unique('organization_commonFieldName', ['organizationId', 'name'])
 export class CommonField extends BaseEntity {
@@ -34,6 +31,9 @@ export class CommonField extends BaseEntity {
 
   @Column()
   label: string;
+
+  @Column({ type: 'text' })
+  description: string;
 
   @Column({
     type: 'enum',
@@ -55,6 +55,9 @@ export class CommonField extends BaseEntity {
     enum: CommonFieldPrivacy,
   })
   privacy: CommonFieldPrivacy;
+
+  @Column({ type: 'json', nullable: true })
+  attributes: CommonFieldAttributes;
 
   @Column({ default: 10, type: 'int' })
   order: number;
@@ -81,6 +84,7 @@ export class CommonField extends BaseEntity {
     if (data) {
       Object.assign(this, data);
       this.options = this.options || [];
+      this.attributes = this.attributes || {};
     }
   }
 }

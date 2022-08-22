@@ -11,8 +11,6 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { OrganizationApi } from 'src/auth/decorators/organization-api.decorator';
 import { TokenRequest } from 'src/auth/interfaces/token-request.interface';
-import { Paginate, PaginateQuery } from 'src/paginator';
-import { PaginateQueryOptions } from 'src/paginator/paginate-query-options.decorator';
 import { Permit } from 'src/role/decorators/permit.decorator';
 import { Resources } from 'src/role/enums/resources.enum';
 import { CommonFieldService } from './common-field.service';
@@ -28,15 +26,14 @@ export class CommonFieldController {
   constructor(private readonly service: CommonFieldService) {}
 
   @Get()
-  @PaginateQueryOptions()
   @Permit({
     resource: Resources.CommonField,
     action: 'read',
     possession: 'own',
   })
-  getMany(@Request() request: TokenRequest, @Paginate() query: PaginateQuery) {
+  getMany(@Request() request: TokenRequest) {
     this.service.organizationId = request.tokenData.organizationId;
-    return this.service.getMany(query);
+    return this.service.getMany();
   }
   @Get(':id')
   @Permit({

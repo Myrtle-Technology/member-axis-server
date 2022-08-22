@@ -289,7 +289,7 @@ export class AuthService {
     );
 
     // get all fields that are not default fields
-    const commonFields = dto.dto.filter((d) => d.id);
+    const commonFields = dto.commonFields.filter((d) => d.id);
     const bulkDto: MemberCommonField[] = commonFields.map(
       (commonField) =>
         new MemberCommonField({

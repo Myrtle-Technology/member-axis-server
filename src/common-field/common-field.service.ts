@@ -12,6 +12,7 @@ import { Repository } from 'typeorm';
 import { CreateCommonFieldDto } from './dto/create-common-field.dto';
 import { UpdateCommonFieldDto } from './dto/update-common-field.dto';
 import { CommonField } from './entities/common-field.entity';
+import { CommonFieldType } from './enums/common-field-type.enum';
 
 @Injectable()
 export class CommonFieldService extends SharedService<CommonField> {
@@ -22,24 +23,60 @@ export class CommonFieldService extends SharedService<CommonField> {
 
   organizationId: number;
 
+  public defaultFields = [
+    new CommonField({
+      name: 'firstName',
+      type: CommonFieldType.text,
+      required: true,
+      label: 'First Name',
+      order: 0,
+    }),
+    new CommonField({
+      name: 'lastName',
+      type: CommonFieldType.text,
+      required: true,
+      label: 'Last Name',
+      order: 1,
+    }),
+    new CommonField({
+      name: 'username',
+      type: CommonFieldType.text,
+      required: true,
+      label: 'Email or Phone Number',
+      order: 2,
+    }),
+    new CommonField({
+      name: 'password',
+      type: CommonFieldType.password,
+      required: false,
+      label: 'Password',
+      order: 3,
+    }),
+  ];
+
   config(organizationId: number): PaginateConfig<CommonField> {
     return {
-      relations: ['organization'],
+      relations: ['organization', 'form'],
       sortableColumns: [
         'id',
         'name',
         'label',
         'type',
+        'privacy',
         'options',
         'required',
         'members',
         'order',
         'organizationId',
         'organization',
+        'organization.name',
+        'form',
+        'formId',
+        'form.name',
       ],
       defaultSortBy: [
         ['order', 'ASC'],
-        ['id', 'DESC'],
+        ['name', 'DESC'],
       ],
       filterableColumns: {
         organizationId: [FilterOperator.EQ],
@@ -52,11 +89,11 @@ export class CommonFieldService extends SharedService<CommonField> {
     };
   }
 
-  getMany(query?: PaginateQuery): Promise<Paginated<CommonField>> {
-    return paginate(query, this.repo, this.config(this.organizationId));
-    // return this.repo.find({
-    //   where: { organizationId: this.organizationId },
-    // });
+  getMany(): Promise<CommonField[]> {
+    // return paginate(query, this.repo, this.config(this.organizationId));
+    return this.repo.find({
+      where: { organizationId: this.organizationId },
+    });
   }
 
   getOne(id: number) {

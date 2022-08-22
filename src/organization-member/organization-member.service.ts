@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -124,8 +124,16 @@ export class OrganizationMemberService extends SharedService<OrganizationMember>
     id: number,
     dto: UpdateOrganizationMemberDto,
   ): Promise<OrganizationMember> {
-    await this.repo.update({ id, organizationId: this.organizationId }, dto);
-    return this.repo.findOne(id);
+    const member = await this.repo.findOne(id);
+    if (!member) {
+      throw new NotFoundException('The specified member was not found');
+    }
+    await this.repo.update(
+      { id: member.id, organizationId: this.organizationId },
+      dto,
+    );
+    await member.reload();
+    return member;
   }
 
   async deleteOne(id: number): Promise<boolean> {

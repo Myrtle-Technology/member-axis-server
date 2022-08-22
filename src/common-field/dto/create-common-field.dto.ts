@@ -1,7 +1,5 @@
-import {
-  CommonFieldOption,
-  CommonFieldPrivacy,
-} from '../entities/common-field.entity';
+import { CommonFieldPrivacy } from '../entities/common-field.entity';
+import { CommonFieldOption } from './common-field-option.dto';
 import { CommonFieldType } from '../enums/common-field-type.enum';
 
 export class CreateCommonFieldDto {

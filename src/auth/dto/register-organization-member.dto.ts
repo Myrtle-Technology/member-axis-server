@@ -16,9 +16,6 @@ export class RegisterOrganizationMember {
   @MinLength(6)
   @MaxLength(20)
   password: string;
-
-  [key: string]: any;
-
   membershipPlanId: number;
-  dto: MemberCommonField[];
+  commonFields: MemberCommonField[];
 }

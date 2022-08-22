@@ -6,11 +6,13 @@ import { Organization } from './entities';
 import { MemberCommonFieldModule } from 'src/member-common-field/member-common-field.module';
 import { OrganizationMemberModule } from 'src/organization-member/organization-member.module';
 import { MembershipPlanModule } from 'src/membership-plan/membership-plan.module';
+import { CommonFieldModule } from 'src/common-field/common-field.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Organization]),
     MemberCommonFieldModule,
+    CommonFieldModule,
     OrganizationMemberModule,
     MembershipPlanModule,
   ],

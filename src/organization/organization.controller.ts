@@ -28,7 +28,7 @@ import { OrganizationApi } from 'src/auth/decorators/organization-api.decorator'
     exclude: ['createManyBase', 'replaceOneBase', 'recoverOneBase'],
   },
   query: {
-    join: {},
+    join: { membershipPlans: { eager: true } },
   },
 })
 @Controller('organizations')

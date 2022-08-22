@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@rewiko/crud-typeorm';
 import { unionBy } from 'lodash';
+import { CommonFieldService } from 'src/common-field/common-field.service';
 import { CommonField } from 'src/common-field/entities/common-field.entity';
 import { CommonFieldType } from 'src/common-field/enums/common-field-type.enum';
 import { MemberCommonFieldService } from 'src/member-common-field/member-common-field.service';
@@ -16,43 +17,13 @@ export class OrganizationService extends TypeOrmCrudService<Organization> {
   constructor(
     @InjectRepository(Organization) repo,
     public memberCommonFieldService: MemberCommonFieldService,
+    public commonFieldService: CommonFieldService,
     public membershipPlanService: MembershipPlanService,
   ) {
     super(repo);
   }
 
   public organizationId: number;
-
-  public fields = [
-    new CommonField({
-      name: 'firstName',
-      type: CommonFieldType.text,
-      required: true,
-      label: 'First Name',
-      order: 0,
-    }),
-    new CommonField({
-      name: 'lastName',
-      type: CommonFieldType.text,
-      required: true,
-      label: 'Last Name',
-      order: 1,
-    }),
-    new CommonField({
-      name: 'username',
-      type: CommonFieldType.text,
-      required: true,
-      label: 'Email or Phone Number',
-      order: 2,
-    }),
-    new CommonField({
-      name: 'password',
-      type: CommonFieldType.password,
-      required: false,
-      label: 'Password',
-      order: 3,
-    }),
-  ];
 
   async getOrganizationBySlug(organizationSlug: string) {
     return this.repo.findOne({ where: { slug: organizationSlug } });
@@ -73,7 +44,7 @@ export class OrganizationService extends TypeOrmCrudService<Organization> {
     });
     return unionBy(
       [
-        ...this.fields,
+        ...this.commonFieldService.defaultFields,
         new CommonField({
           name: 'membershipPlanId',
           type: CommonFieldType.number,

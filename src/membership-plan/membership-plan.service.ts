@@ -122,7 +122,7 @@ export class MembershipPlanService extends SharedService<MembershipPlan> {
       { id: currentPlan.id, organizationId: this.organizationId },
       { ...nDto, changeableTo: plansMemberCanChangeTo },
     );
-    currentPlan.reload();
+    await currentPlan.reload();
     return currentPlan;
   }
 

@@ -1,4 +1,11 @@
-import { IsInt, IsPhoneNumber, IsString, Min } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  Min,
+} from 'class-validator';
+import { MemberCommonField } from 'src/member-common-field/entities/member-common-field.entity';
 
 export class CreateOrganizationMemberDto {
   @Min(1)
@@ -24,4 +31,7 @@ export class CreateOrganizationMemberDto {
 
   @IsString()
   password?: string;
+
+  @IsOptional()
+  commonFields?: MemberCommonField[];
 }
