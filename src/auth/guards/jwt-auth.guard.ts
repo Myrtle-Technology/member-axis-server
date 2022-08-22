@@ -34,11 +34,17 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const organizationSlug = request.headers[
         ORGANIZATION_API_HEADER
       ] as string;
-      if (organizationSlug !== 'gembrs' && !organizationSlug) {
+
+      if (organizationSlug == 'gembrs') {
+        return true;
+      }
+
+      if (!organizationSlug) {
         throw new BadRequestException(
           'Please specify the organization you want to access',
         );
       }
+
       return this.organizationService
         .findOne({
           slug: organizationSlug,

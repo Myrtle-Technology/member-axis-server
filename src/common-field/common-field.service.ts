@@ -7,24 +7,20 @@ import {
   Paginated,
   paginate,
 } from 'src/paginator';
+import { SharedService } from 'src/shared/shared.service';
 import { Repository } from 'typeorm';
 import { CreateCommonFieldDto } from './dto/create-common-field.dto';
 import { UpdateCommonFieldDto } from './dto/update-common-field.dto';
 import { CommonField } from './entities/common-field.entity';
 
 @Injectable()
-export class CommonFieldService {
+export class CommonFieldService extends SharedService<CommonField> {
   logger = new Logger(CommonFieldService.name);
-  constructor(
-    @InjectRepository(CommonField)
-    private repo: Repository<CommonField>,
-  ) {}
+  constructor(@InjectRepository(CommonField) repo: Repository<CommonField>) {
+    super(repo);
+  }
 
   organizationId: number;
-
-  find = this.repo.find;
-  findOne = this.repo.findOne;
-  create = this.repo.create;
 
   config(organizationId: number): PaginateConfig<CommonField> {
     return {
@@ -72,16 +68,18 @@ export class CommonFieldService {
 
   createOne(dto: CreateCommonFieldDto): Promise<CommonField> {
     dto.organizationId = this.organizationId;
-    return this.repo.save(dto);
+    return this.repo.save(new CommonField(dto));
   }
 
-  createMany(bulkDto: CreateCommonFieldDto[]): Promise<CommonField[]> {
-    return this.repo.save(
-      bulkDto.map((dto) => ({
-        ...dto,
-        organizationId: this.organizationId,
-      })),
+  createMany(dto: CreateCommonFieldDto[]): Promise<CommonField[]> {
+    const bulkDto = dto.map(
+      (dto) =>
+        new CommonField({
+          ...dto,
+          organizationId: this.organizationId,
+        }),
     );
+    return this.repo.save(bulkDto);
   }
 
   async updateOne(id: number, dto: UpdateCommonFieldDto): Promise<CommonField> {

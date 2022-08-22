@@ -2,10 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@rewiko/crud-typeorm';
 import { unionBy } from 'lodash';
-import {
-  CommonField,
-  CommonFieldType,
-} from 'src/common-field/entities/common-field.entity';
+import { CommonField } from 'src/common-field/entities/common-field.entity';
+import { CommonFieldType } from 'src/common-field/enums/common-field-type.enum';
 import { MemberCommonFieldService } from 'src/member-common-field/member-common-field.service';
 import { MembershipPlanService } from 'src/membership-plan/membership-plan.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
