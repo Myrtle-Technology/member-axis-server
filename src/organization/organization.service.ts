@@ -51,6 +51,7 @@ export class OrganizationService extends TypeOrmCrudService<Organization> {
           required: false,
           label: 'Membership Plan',
           order: -1,
+          attributes: { hidden: true },
           options: membershipPlans.map((p) => ({
             label: p.name,
             value: p.id,

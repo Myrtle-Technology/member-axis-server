@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { OrganizationMember } from 'src/organization-member/entities';
 import { Organization } from 'src/organization/entities';
 import {
   BaseEntity,
@@ -61,6 +62,12 @@ export class MembershipPlan extends BaseEntity {
 
   @Column({ nullable: true })
   publishedAt: Date;
+
+  @OneToMany(
+    () => OrganizationMember,
+    (organizationMember) => organizationMember.membershipPlan,
+  )
+  members: OrganizationMember[];
 
   @CreateDateColumn() createdAt: Date;
 

@@ -1,12 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  PaginateConfig,
-  FilterOperator,
-  PaginateQuery,
-  Paginated,
-  paginate,
-} from 'src/paginator';
+import { unionBy } from 'lodash';
 import { SharedService } from 'src/shared/shared.service';
 import { Repository } from 'typeorm';
 import { CreateCommonFieldDto } from './dto/create-common-field.dto';
@@ -54,46 +48,16 @@ export class CommonFieldService extends SharedService<CommonField> {
     }),
   ];
 
-  config(organizationId: number): PaginateConfig<CommonField> {
-    return {
-      relations: ['organization', 'form'],
-      sortableColumns: [
-        'id',
-        'name',
-        'label',
-        'type',
-        'privacy',
-        'options',
-        'required',
-        'members',
-        'order',
-        'organizationId',
-        'organization',
-        'organization.name',
-        'form',
-        'formId',
-        'form.name',
+  async getMany(): Promise<CommonField[]> {
+    return unionBy(
+      [
+        ...this.defaultFields,
+        ...(await this.repo.find({
+          where: { organizationId: this.organizationId },
+        })),
       ],
-      defaultSortBy: [
-        ['order', 'ASC'],
-        ['name', 'DESC'],
-      ],
-      filterableColumns: {
-        organizationId: [FilterOperator.EQ],
-        order: [FilterOperator.EQ],
-        'members.id': [FilterOperator.EQ],
-      },
-      maxLimit: 100,
-      defaultLimit: 50,
-      where: { organizationId },
-    };
-  }
-
-  getMany(): Promise<CommonField[]> {
-    // return paginate(query, this.repo, this.config(this.organizationId));
-    return this.repo.find({
-      where: { organizationId: this.organizationId },
-    });
+      'name',
+    ).sort((a, b) => a.order - b.order);
   }
 
   getOne(id: number) {

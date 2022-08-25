@@ -17,6 +17,7 @@ import { Exclude } from 'class-transformer';
 import { CrudRequestTypes } from 'nestjs-crud-microservice-validation/lib';
 import { Organization } from 'src/organization/entities';
 import { MemberCommonField } from 'src/member-common-field/entities/member-common-field.entity';
+import { MembershipPlan } from 'src/membership-plan/entities/membership-plan.entity';
 
 @Entity()
 export class OrganizationMember extends BaseEntity {
@@ -43,6 +44,16 @@ export class OrganizationMember extends BaseEntity {
 
   @Column()
   roleId: number;
+
+  @ManyToOne(() => MembershipPlan, (plan) => plan.members, {
+    eager: true,
+  })
+  @JoinColumn({ name: 'membershipPlanId' })
+  @ApiProperty({ type: () => MembershipPlan })
+  membershipPlan: MembershipPlan;
+
+  @Column()
+  membershipPlanId: number;
 
   @ManyToOne(() => Role, (role) => role.organizationMembers, { eager: true })
   @JoinColumn({ name: 'roleId' })

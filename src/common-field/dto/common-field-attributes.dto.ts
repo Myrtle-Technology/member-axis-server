@@ -1,7 +1,7 @@
 export class CommonFieldAttributes {
   min?: number;
   max?: number;
-  disabled?: number;
+  hidden?: boolean;
   [key: string]: any;
 
   constructor(data?: Partial<CommonFieldAttributes>) {
