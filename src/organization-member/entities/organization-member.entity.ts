@@ -45,15 +45,16 @@ export class OrganizationMember extends BaseEntity {
   @Column()
   roleId: number;
 
-  @ManyToOne(() => MembershipPlan, (plan) => plan.members, {
-    eager: true,
-  })
-  @JoinColumn({ name: 'membershipPlanId' })
-  @ApiProperty({ type: () => MembershipPlan })
-  membershipPlan: MembershipPlan;
+  // WE may need to use another table called subscriptions
+  // @ManyToOne(() => MembershipPlan, (plan) => plan.members, {
+  //   eager: true,
+  // })
+  // @JoinColumn({ name: 'membershipPlanId' })
+  // @ApiProperty({ type: () => MembershipPlan })
+  // membershipPlan: MembershipPlan;
 
-  @Column()
-  membershipPlanId: number;
+  // @Column()
+  // membershipPlanId: number;
 
   @ManyToOne(() => Role, (role) => role.organizationMembers, { eager: true })
   @JoinColumn({ name: 'roleId' })

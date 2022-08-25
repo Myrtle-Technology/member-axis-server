@@ -87,6 +87,6 @@ export class Organization {
   @OneToMany(() => CommonField, (commonField) => commonField.organization)
   commonFields: CommonField[];
 
-  @OneToMany(() => MembershipPlan, (mp) => mp.organization)
+  @OneToMany(() => MembershipPlan, (mp) => mp.organization, { eager: true })
   membershipPlans: MembershipPlan[];
 }

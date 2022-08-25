@@ -63,11 +63,11 @@ export class MembershipPlan extends BaseEntity {
   @Column({ nullable: true })
   publishedAt: Date;
 
-  @OneToMany(
-    () => OrganizationMember,
-    (organizationMember) => organizationMember.membershipPlan,
-  )
-  members: OrganizationMember[];
+  // @OneToMany(
+  //   () => OrganizationMember,
+  //   (organizationMember) => organizationMember.membershipPlan,
+  // )
+  // members: OrganizationMember[];
 
   @CreateDateColumn() createdAt: Date;
 
