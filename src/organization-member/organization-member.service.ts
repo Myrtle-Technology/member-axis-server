@@ -2,6 +2,7 @@ import { Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { InvitationService } from 'src/invitation/invitation.service';
 import {
   FilterOperator,
   paginate,
@@ -24,6 +25,7 @@ export class OrganizationMemberService extends SharedService<OrganizationMember>
     repo: Repository<OrganizationMember>,
     private configService: ConfigService,
     private subscriptionService: SubscriptionService,
+    private invitationService: InvitationService,
   ) {
     super(repo);
   }
@@ -137,6 +139,7 @@ export class OrganizationMemberService extends SharedService<OrganizationMember>
     // create new subscription to a membership plan
     // get member Role
     // create a member without password
+    // create invitation
     // send member an invite email
   }
 }
