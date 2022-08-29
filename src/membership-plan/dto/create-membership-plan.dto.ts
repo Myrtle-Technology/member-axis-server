@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
@@ -8,6 +9,8 @@ import {
 } from 'class-validator';
 import { PlanPaymentMethod } from '../enums/plan-payment-method';
 import { PlanRenewalDuration } from '../enums/plan-renewal-duration';
+import { BundleAdministratorWorkflowSettings } from './bundle-administrator-workflow-settings.dto';
+import { RenewalReminder } from './renewal-reminder.dto';
 
 export class CreateMembershipPlanDto {
   @IsString()
@@ -30,6 +33,7 @@ export class CreateMembershipPlanDto {
   @IsArray()
   memberCanChangeTo: number[];
 
+  @IsEnum(PlanRenewalDuration)
   renewalDuration: PlanRenewalDuration;
 
   renewalDurationCount: number;
@@ -42,4 +46,22 @@ export class CreateMembershipPlanDto {
 
   @IsOptional()
   organizationId: number;
+
+  @ApiProperty({ type: () => BundleAdministratorWorkflowSettings })
+  bundleAdministratorWorkflowSettings: BundleAdministratorWorkflowSettings;
+
+  @ApiProperty({ type: () => RenewalReminder })
+  renewalReminderAfter1: RenewalReminder;
+
+  @ApiProperty({ type: () => RenewalReminder })
+  renewalReminderAfter2: RenewalReminder;
+
+  @ApiProperty({ type: () => RenewalReminder })
+  renewalReminderBefore1: RenewalReminder;
+
+  @ApiProperty({ type: () => RenewalReminder })
+  renewalReminderBefore2: RenewalReminder;
+
+  @ApiProperty({ type: () => RenewalReminder })
+  renewalReminderOnDueDate: RenewalReminder;
 }

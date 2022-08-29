@@ -14,8 +14,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BundleAdministratorWorkflowSettings } from '../dto/bundle-administrator-workflow-settings.dto';
+import { RenewalReminder } from '../dto/renewal-reminder.dto';
+import { RenewalReminderWhen } from '../enums/renewal-reminder-when.enum';
 import { PlanPaymentMethod } from '../enums/plan-payment-method';
 import { PlanRenewalDuration } from '../enums/plan-renewal-duration';
+import { PlanType } from '../enums/plan-type';
 
 @Entity()
 export class MembershipPlan extends BaseEntity {
@@ -33,10 +37,17 @@ export class MembershipPlan extends BaseEntity {
 
   @Column({
     type: 'enum',
-    default: PlanPaymentMethod.offline,
+    default: PlanPaymentMethod.Offline,
     enum: PlanPaymentMethod,
   })
   paymentMethod: PlanPaymentMethod;
+
+  @Column({
+    type: 'enum',
+    default: PlanType.Individual,
+    enum: PlanType,
+  })
+  type: PlanType;
 
   @Column({ default: true })
   isPublic: boolean;
@@ -46,7 +57,7 @@ export class MembershipPlan extends BaseEntity {
   changeableTo: MembershipPlan[];
 
   @Column({
-    default: PlanRenewalDuration.never,
+    default: PlanRenewalDuration.Never,
     enum: PlanRenewalDuration,
     type: 'enum',
   })
@@ -63,6 +74,30 @@ export class MembershipPlan extends BaseEntity {
   @Column({ nullable: true })
   publishedAt: Date;
 
+  @Column({ type: 'json', nullable: false })
+  @ApiProperty({ type: () => BundleAdministratorWorkflowSettings })
+  bundleAdministratorWorkflowSettings: BundleAdministratorWorkflowSettings;
+
+  @Column({ type: 'json', nullable: false })
+  @ApiProperty({ type: () => RenewalReminder })
+  renewalReminderBefore1: RenewalReminder;
+
+  @Column({ type: 'json', nullable: false })
+  @ApiProperty({ type: () => RenewalReminder })
+  renewalReminderBefore2: RenewalReminder;
+
+  @Column({ type: 'json', nullable: false })
+  @ApiProperty({ type: () => RenewalReminder })
+  renewalReminderOnDueDate: RenewalReminder;
+
+  @Column({ type: 'json', nullable: false })
+  @ApiProperty({ type: () => RenewalReminder })
+  renewalReminderAfter1: RenewalReminder;
+
+  @Column({ type: 'json', nullable: false })
+  @ApiProperty({ type: () => RenewalReminder })
+  renewalReminderAfter2: RenewalReminder;
+
   @Column()
   organizationId: number;
 
@@ -74,17 +109,67 @@ export class MembershipPlan extends BaseEntity {
   @OneToMany(() => Subscription, (subscription) => subscription.membershipPlan)
   subscriptions: Subscription[];
 
-  // for paystack
+  // for paystack (or paystackPlanId)
   // externalPlanId: string;
 
   @CreateDateColumn() createdAt: Date;
 
   @UpdateDateColumn() updatedAt: Date;
-}
 
-/*
-Reminders:
-n days before renewal date (twice 14, 7)
-n days after renewal date (twice 7, 1)
-on renewal date
-*/
+  constructor(dto?: Partial<MembershipPlan>) {
+    super();
+    if (dto) {
+      Object.assign(this, dto);
+    }
+
+    // Setup defaults
+    this.bundleAdministratorWorkflowSettings =
+      this.bundleAdministratorWorkflowSettings ??
+      new BundleAdministratorWorkflowSettings({
+        membershipMustBeApprovedByAdmin: true,
+        paymentMustBeReceivedBeforeMemberActivated: true,
+      });
+
+    this.renewalReminderBefore1 =
+      this.renewalReminderBefore1 ??
+      new RenewalReminder({
+        noOfDays: 14,
+        when: RenewalReminderWhen.Before,
+        sendEmail: false,
+        sendEmailTo: [],
+      });
+    this.renewalReminderBefore2 =
+      this.renewalReminderBefore2 ??
+      new RenewalReminder({
+        noOfDays: 7,
+        when: RenewalReminderWhen.Before,
+        sendEmail: false,
+        sendEmailTo: [],
+      });
+    this.renewalReminderAfter1 =
+      this.renewalReminderAfter1 ??
+      new RenewalReminder({
+        noOfDays: 7,
+        when: RenewalReminderWhen.After,
+        sendEmail: false,
+        sendEmailTo: [],
+        changeMembershipLevelTo: null,
+      });
+    this.renewalReminderAfter2 =
+      this.renewalReminderAfter2 ??
+      new RenewalReminder({
+        noOfDays: 14,
+        when: RenewalReminderWhen.After,
+        sendEmail: false,
+        sendEmailTo: [],
+      });
+    this.renewalReminderOnDueDate =
+      this.renewalReminderOnDueDate ??
+      new RenewalReminder({
+        noOfDays: 0,
+        when: RenewalReminderWhen.On,
+        sendEmail: false,
+        sendEmailTo: [],
+      });
+  }
+}

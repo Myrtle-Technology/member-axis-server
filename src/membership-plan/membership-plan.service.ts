@@ -15,7 +15,6 @@ import { SharedService } from 'src/shared/shared.service';
 import { MemberCommonFieldService } from 'src/member-common-field/member-common-field.service';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { MembershipPlanCreated } from './events/membership-plan-created.event';
-import { SubscriptionService } from 'src/subscription/subscription.service';
 
 @Injectable()
 export class MembershipPlanService extends SharedService<MembershipPlan> {
@@ -82,10 +81,12 @@ export class MembershipPlanService extends SharedService<MembershipPlan> {
     });
     delete dto.memberCanChangeTo;
     const nDto: Omit<CreateMembershipPlanDto, 'memberCanChangeTo'> = dto;
-    const currentPlan = await this.repo.save({
-      ...nDto,
-      changeableTo: plansMemberCanChangeTo,
-    });
+    const currentPlan = await this.repo.save(
+      new MembershipPlan({
+        ...nDto,
+        changeableTo: plansMemberCanChangeTo,
+      }),
+    );
     this.eventEmitter.emit(
       MembershipPlanCreated.eventName,
       new MembershipPlanCreated(currentPlan),
@@ -96,7 +97,7 @@ export class MembershipPlanService extends SharedService<MembershipPlan> {
   @OnEvent(MembershipPlanCreated.eventName, { async: true })
   async handleMembershipPlanCreatedEvent(payload: MembershipPlanCreated) {
     // handle and process "MembershipPlanCreated" event
-    // set up reminders for the new plan
+    // create paystack plan
   }
 
   async updateOne(
@@ -121,7 +122,7 @@ export class MembershipPlanService extends SharedService<MembershipPlan> {
     // update current plan
     await this.repo.update(
       { id: currentPlan.id, organizationId: this.organizationId },
-      { ...nDto, changeableTo: plansMemberCanChangeTo },
+      new MembershipPlan({ ...nDto, changeableTo: plansMemberCanChangeTo }),
     );
     await currentPlan.reload();
     return currentPlan;

@@ -1,4 +1,4 @@
 export enum PlanPaymentMethod {
-  online = 'online',
-  offline = 'offline',
+  Online = 'online',
+  Offline = 'offline',
 }

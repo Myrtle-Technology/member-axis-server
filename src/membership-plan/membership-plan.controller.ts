@@ -11,7 +11,7 @@ import {
 import { MembershipPlanService } from './membership-plan.service';
 import { CreateMembershipPlanDto } from './dto/create-membership-plan.dto';
 import { UpdateMembershipPlanDto } from './dto/update-membership-plan.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OrganizationApi } from 'src/auth/decorators/organization-api.decorator';
 import { TokenRequest } from 'src/auth/interfaces/token-request.interface';
 import { Paginate, PaginateQuery } from 'src/shared/paginator';
@@ -35,6 +35,7 @@ export class MembershipPlanController {
     action: 'read',
     possession: 'own',
   })
+  @ApiOperation({ description: 'Get all plans' })
   getMany(@Request() request: TokenRequest, @Paginate() query: PaginateQuery) {
     this.service.organizationId = request.tokenData.organizationId;
     return this.service.getMany(query);

@@ -8,6 +8,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Unique,
+  BaseEntity,
 } from 'typeorm';
 import {
   IsEmail,
@@ -23,7 +24,7 @@ import { MembershipPlan } from 'src/membership-plan/entities/membership-plan.ent
 
 @Entity()
 @Unique('slug_unique', ['slug'])
-export class Organization {
+export class Organization extends BaseEntity {
   @PrimaryGeneratedColumn() id: number;
 
   @IsNotEmpty()
@@ -89,4 +90,9 @@ export class Organization {
 
   @OneToMany(() => MembershipPlan, (mp) => mp.organization, { eager: true })
   membershipPlans: MembershipPlan[];
+
+  constructor(dto?: Partial<Organization>) {
+    super();
+    if (dto) Object.assign(this, dto);
+  }
 }

@@ -1,8 +1,8 @@
 export enum PlanRenewalDuration {
-  never = 'never',
-  day = 'day',
-  week = 'week',
-  month = 'month',
-  year = 'year',
-  lifetime = 'lifetime',
+  Never = 'never',
+  Day = 'day',
+  Week = 'week',
+  Month = 'month',
+  Year = 'year',
+  Lifetime = 'lifetime',
 }
