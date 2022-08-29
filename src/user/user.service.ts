@@ -59,4 +59,13 @@ export class UserService extends SharedService<User> {
     }
     return user;
   }
+
+  async findOrCreateUserByUsername(username: string): Promise<User> {
+    let user: User;
+    user = await this.getUserByUsername(username, false);
+    if (!user) {
+      user = await this.createUserByUsername(username);
+    }
+    return user;
+  }
 }

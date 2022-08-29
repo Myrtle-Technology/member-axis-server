@@ -63,11 +63,9 @@ export class AuthService {
   }
 
   async verifyEmailOrPhone(dto: VerifyEmailDto) {
-    let user: User;
-    user = await this.userService.getUserByUsername(dto.username, false);
-    if (!user) {
-      user = await this.userService.createUserByUsername(dto.username);
-    }
+    const user: User = await this.userService.findOrCreateUserByUsername(
+      dto.username,
+    );
     if (!(this.isDevServer == 'true')) {
       if (isEmail(dto.username)) {
         const code = Math.floor(100000 + Math.random() * 900000);
@@ -271,14 +269,11 @@ export class AuthService {
       );
     }
 
-    const user = await this.userService.createOne(
-      new User({
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        email: isEmail(dto.username) ? dto.username : null,
-        phone: isPhoneNumber(dto.username) ? dto.username : null,
-      }),
-    );
+    let user = await this.userService.findOrCreateUserByUsername(dto.username);
+    user = await this.userService.updateOne(user.id, {
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+    });
 
     const organizationMember = await this.organizationMemberService.createOne(
       new OrganizationMember({

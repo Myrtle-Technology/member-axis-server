@@ -6,7 +6,7 @@ import {
   PaginateQuery,
   Paginated,
   paginate,
-} from 'src/paginator';
+} from 'src/shared/paginator';
 import { Repository, In } from 'typeorm';
 import { CreateMembershipPlanDto } from './dto/create-membership-plan.dto';
 import { UpdateMembershipPlanDto } from './dto/update-membership-plan.dto';
@@ -15,6 +15,7 @@ import { SharedService } from 'src/shared/shared.service';
 import { MemberCommonFieldService } from 'src/member-common-field/member-common-field.service';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { MembershipPlanCreated } from './events/membership-plan-created.event';
+import { SubscriptionService } from 'src/subscription/subscription.service';
 
 @Injectable()
 export class MembershipPlanService extends SharedService<MembershipPlan> {
@@ -22,7 +23,7 @@ export class MembershipPlanService extends SharedService<MembershipPlan> {
   constructor(
     @InjectRepository(MembershipPlan)
     public repo: Repository<MembershipPlan>,
-    public memberCommonFieldService: MemberCommonFieldService,
+    private memberCommonFieldService: MemberCommonFieldService,
     private eventEmitter: EventEmitter2,
   ) {
     super(repo);

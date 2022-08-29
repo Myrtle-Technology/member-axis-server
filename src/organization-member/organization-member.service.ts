@@ -8,8 +8,9 @@ import {
   PaginateConfig,
   Paginated,
   PaginateQuery,
-} from 'src/paginator';
+} from 'src/shared/paginator';
 import { SharedService } from 'src/shared/shared.service';
+import { SubscriptionService } from 'src/subscription/subscription.service';
 import { Repository } from 'typeorm';
 import { CreateOrganizationMemberDto } from './dto/create-organization-member.dto';
 import { UpdateOrganizationMemberDto } from './dto/update-organization-member.dto';
@@ -22,26 +23,12 @@ export class OrganizationMemberService extends SharedService<OrganizationMember>
     @InjectRepository(OrganizationMember)
     repo: Repository<OrganizationMember>,
     private configService: ConfigService,
+    private subscriptionService: SubscriptionService,
   ) {
     super(repo);
   }
 
   organizationId: number;
-
-  // find(options?: FindManyOptions<OrganizationMember>) {
-  //   return this.repo.find(options);
-  // }
-  // findOne(options?: FindManyOptions<OrganizationMember>) {
-  //   return this.repo.findOne(options);
-  // }
-  // create(
-  //   entities: OrganizationMember,
-  //   options?: SaveOptions & {
-  //     reload: false;
-  //   },
-  // ) {
-  //   return this.repo.save(entities, options);
-  // }
 
   config(organizationId: number): PaginateConfig<OrganizationMember> {
     return {
@@ -104,12 +91,13 @@ export class OrganizationMemberService extends SharedService<OrganizationMember>
     dto: CreateOrganizationMemberDto,
   ): Promise<OrganizationMember> {
     dto.organizationId = dto.organizationId || this.organizationId;
-    dto.password = await bcrypt.hash(dto.password, this.saltRounds);
-    // TODO: password hash or invite user
+    if (dto.password) {
+      dto.password = await bcrypt.hash(dto.password, this.saltRounds);
+    }
     return this.repo.save(dto);
   }
 
-  createMany(
+  async createMany(
     bulkDto: CreateOrganizationMemberDto[],
   ): Promise<OrganizationMember[]> {
     return this.repo.save(
@@ -142,5 +130,13 @@ export class OrganizationMemberService extends SharedService<OrganizationMember>
       organizationId: this.organizationId,
     });
     return true;
+  }
+
+  async inviteMember() {
+    // create a new user
+    // create new subscription to a membership plan
+    // get member Role
+    // create a member without password
+    // send member an invite email
   }
 }

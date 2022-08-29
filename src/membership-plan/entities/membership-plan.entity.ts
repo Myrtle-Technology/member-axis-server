@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { OrganizationMember } from 'src/organization-member/entities';
 import { Organization } from 'src/organization/entities';
+import { Subscription } from 'src/subscription/entities/subscription.entity';
 import {
   BaseEntity,
   Column,
@@ -63,16 +63,6 @@ export class MembershipPlan extends BaseEntity {
   @Column({ nullable: true })
   publishedAt: Date;
 
-  // @OneToMany(
-  //   () => OrganizationMember,
-  //   (organizationMember) => organizationMember.membershipPlan,
-  // )
-  // members: OrganizationMember[];
-
-  @CreateDateColumn() createdAt: Date;
-
-  @UpdateDateColumn() updatedAt: Date;
-
   @Column()
   organizationId: number;
 
@@ -80,6 +70,16 @@ export class MembershipPlan extends BaseEntity {
   @JoinColumn({ name: 'organizationId' })
   @ApiProperty({ type: () => Organization })
   organization: Organization;
+
+  @OneToMany(() => Subscription, (subscription) => subscription.membershipPlan)
+  subscriptions: Subscription[];
+
+  // for paystack
+  // externalPlanId: string;
+
+  @CreateDateColumn() createdAt: Date;
+
+  @UpdateDateColumn() updatedAt: Date;
 }
 
 /*

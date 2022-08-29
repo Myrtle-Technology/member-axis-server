@@ -6,7 +6,7 @@ import {
   PaginateQuery,
   Paginated,
   paginate,
-} from 'src/paginator';
+} from 'src/shared/paginator';
 import { SharedService } from 'src/shared/shared.service';
 import { Repository } from 'typeorm';
 import { CreateMemberCommonFieldDto } from './dto/create-member-common-field.dto';

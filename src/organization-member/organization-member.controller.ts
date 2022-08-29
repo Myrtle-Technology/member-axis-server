@@ -15,10 +15,10 @@ import { OrganizationMember } from './entities';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { OrganizationApi } from 'src/auth/decorators/organization-api.decorator';
 import { Permit } from 'src/role/decorators/permit.decorator';
-import { Paginate, PaginateQuery } from 'src/paginator';
+import { Paginate, PaginateQuery } from 'src/shared/paginator';
 import { TokenRequest } from 'src/auth/interfaces/token-request.interface';
 import { Resources } from 'src/role/enums/resources.enum';
-import { PaginateQueryOptions } from 'src/paginator/paginate-query-options.decorator';
+import { PaginateQueryOptions } from 'src/shared/paginator/paginate-query-options.decorator';
 
 @ApiBearerAuth()
 @OrganizationApi()

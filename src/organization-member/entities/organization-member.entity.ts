@@ -18,6 +18,7 @@ import { CrudRequestTypes } from 'nestjs-crud-microservice-validation/lib';
 import { Organization } from 'src/organization/entities';
 import { MemberCommonField } from 'src/member-common-field/entities/member-common-field.entity';
 import { MembershipPlan } from 'src/membership-plan/entities/membership-plan.entity';
+import { Subscription } from 'src/subscription/entities/subscription.entity';
 
 @Entity()
 export class OrganizationMember extends BaseEntity {
@@ -88,6 +89,9 @@ export class OrganizationMember extends BaseEntity {
 
   @OneToMany(() => MemberCommonField, (c) => c.organizationMember)
   commonFields: MemberCommonField[];
+
+  @OneToMany(() => Subscription, (subscription) => subscription.member)
+  subscriptions: Subscription[];
 
   @CreateDateColumn() createdAt: Date;
 

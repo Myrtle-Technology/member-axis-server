@@ -22,6 +22,8 @@ import { FormModule } from './form/form.module';
 import { InvitationModule } from './invitation/invitation.module';
 import { CommonFieldModule } from './common-field/common-field.module';
 import { MemberCommonFieldModule } from './member-common-field/member-common-field.module';
+import { PaymentModule } from './payment/payment.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -72,6 +74,8 @@ import { MemberCommonFieldModule } from './member-common-field/member-common-fie
     InvitationModule,
     CommonFieldModule,
     MemberCommonFieldModule,
+    PaymentModule,
+    SubscriptionModule,
   ],
   controllers: [AppController],
   providers: [
