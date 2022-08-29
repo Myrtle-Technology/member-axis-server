@@ -45,6 +45,9 @@ import { SubscriptionModule } from './subscription/subscription.module';
         cli: {
           migrationsDir: 'src/migration',
         },
+        extra: {
+          connectionLimit: 5,
+        },
         // synchronize: true,
         // logging: true,
       }),
