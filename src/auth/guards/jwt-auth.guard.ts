@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ExecutionContext,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -50,6 +51,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
           slug: organizationSlug,
         })
         .then((organization) => {
+          if (!organization)
+            throw new NotFoundException(
+              'No organization with the specified site name was found',
+            );
           request.organizationId = organization.id;
           return !!organization;
         });
