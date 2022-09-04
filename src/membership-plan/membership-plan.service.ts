@@ -15,6 +15,7 @@ import { SharedService } from 'src/shared/shared.service';
 import { MemberCommonFieldService } from 'src/member-common-field/member-common-field.service';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { MembershipPlanCreated } from './events/membership-plan-created.event';
+import { RenewalReminder } from './dto/renewal-reminder.dto';
 
 @Injectable()
 export class MembershipPlanService extends SharedService<MembershipPlan> {
@@ -77,7 +78,7 @@ export class MembershipPlanService extends SharedService<MembershipPlan> {
   async createOne(dto: CreateMembershipPlanDto): Promise<MembershipPlan> {
     dto.organizationId = this.organizationId;
     const plansMemberCanChangeTo = await this.repo.find({
-      where: { id: In(dto.memberCanChangeTo) },
+      where: { id: In(dto.memberCanChangeTo || []) },
     });
     delete dto.memberCanChangeTo;
     const nDto: Omit<CreateMembershipPlanDto, 'memberCanChangeTo'> = dto;
