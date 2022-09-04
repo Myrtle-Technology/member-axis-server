@@ -4,5 +4,4 @@ export enum PlanRenewalDuration {
   Week = 'week',
   Month = 'month',
   Year = 'year',
-  Lifetime = 'lifetime',
 }
