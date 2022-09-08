@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MembershipPlan } from 'src/membership-plan/entities/membership-plan.entity';
+import { PlanPaymentMethod } from 'src/membership-plan/enums/plan-payment-method';
 import { OrganizationMember } from 'src/organization-member/entities';
+import { Organization } from 'src/organization/entities';
 import {
   BaseEntity,
   Column,
@@ -18,6 +20,13 @@ export class Subscription extends BaseEntity {
   @PrimaryGeneratedColumn() id: number;
 
   @Column()
+  organizationId: number;
+  @ManyToOne(() => Organization, (m) => m.commonFields)
+  @JoinColumn({ name: 'organizationId' })
+  @ApiProperty({ type: () => Organization })
+  organization: Organization;
+
+  @Column()
   memberId: number;
 
   @ManyToOne(() => OrganizationMember, (member) => member.subscriptions)
@@ -29,7 +38,7 @@ export class Subscription extends BaseEntity {
   membershipPlanId: number;
 
   @ManyToOne(() => MembershipPlan, (member) => member.subscriptions)
-  @JoinColumn({ name: 'memberId' })
+  @JoinColumn({ name: 'membershipPlanId' })
   @ApiProperty({ type: () => MembershipPlan })
   membershipPlan: MembershipPlan;
 
@@ -49,22 +58,23 @@ export class Subscription extends BaseEntity {
   @Column({ default: true })
   cancelAtPeriodEnd: boolean;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'datetime', nullable: true })
   cancelAt: Date;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'datetime', nullable: true })
   canceledAt: Date;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'datetime', nullable: true })
   endedAt: Date;
 
-  // @Column()
-  // defaultPaymentMethod: "online" |"offline";
+  @Column({
+    type: 'enum',
+    enum: PlanPaymentMethod,
+    default: PlanPaymentMethod.Offline,
+  })
+  defaultPaymentMethod: PlanPaymentMethod;
 
   // paymentId: number;
-
-  // // for paystack
-  // externalSubscriptionId: string;
 
   // metaData: Record<string, any>;
 

@@ -11,7 +11,7 @@ import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 import { User } from 'src/user/entities';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { LoginDto } from './dto/login.dto';
-import { isEmail, isPhoneNumber } from 'class-validator';
+import { isEmail } from 'class-validator';
 import * as bcrypt from 'bcrypt';
 import { OrganizationMember } from 'src/organization-member/entities';
 import { Token } from './entities/token.entity';
@@ -34,7 +34,10 @@ import { MemberCommonField } from 'src/member-common-field/entities/member-commo
 import { MemberCommonFieldService } from 'src/member-common-field/member-common-field.service';
 import { MembershipPlanService } from 'src/membership-plan/membership-plan.service';
 import { RegisterOrganizationMember } from './dto/register-organization-member.dto';
-
+import { SubscriptionService } from 'src/subscription/subscription.service';
+import { SubscriptionStatus } from 'src/subscription/enums/subscription-status.enum';
+import { PlanRenewalDuration } from 'src/membership-plan/enums/plan-renewal-duration';
+import { DateTime, Duration } from 'luxon';
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
   private readonly saltRounds = +this.configService.get<number>('SALT_ROUNDS');
@@ -52,6 +55,7 @@ export class AuthService {
     private organizationMemberService: OrganizationMemberService,
     public memberCommonFieldService: MemberCommonFieldService,
     public membershipPlanService: MembershipPlanService,
+    public subscriptionService: SubscriptionService,
   ) {}
 
   get organizationSlug() {
@@ -184,12 +188,15 @@ export class AuthService {
 
   async loginToOrganization(dto: LoginDto) {
     const organizationMember = (this.request as any).user;
-    return this.getAuthData(organizationMember);
+    return this.getAuthData(organizationMember, dto);
   }
 
-  async getAuthData(organizationMember: OrganizationMember) {
+  async getAuthData(organizationMember: OrganizationMember, dto?: LoginDto) {
     const payload: TokenData = {
-      username: organizationMember.user.email || organizationMember.user.phone,
+      username:
+        dto?.username ||
+        organizationMember.user.email ||
+        organizationMember.user.phone,
       organizationMemberId: organizationMember.id,
       organizationId: organizationMember.organizationId,
       userId: organizationMember.userId,
@@ -260,13 +267,7 @@ export class AuthService {
       dto.membershipPlanId,
     );
     if (!membershipPlan) {
-      throw new BadRequestException('Membership plan not found');
-    }
-
-    if (!isEmail(dto.username) && !isPhoneNumber(dto.username)) {
-      throw new BadRequestException(
-        'Invalid username. Please enter a valid email or phone number',
-      );
+      throw new BadRequestException('Membership level not found');
     }
 
     let user = await this.userService.findOrCreateUserByUsername(dto.username);
@@ -279,22 +280,40 @@ export class AuthService {
       new OrganizationMember({
         userId: user.id,
         organizationId: this.organizationId,
-        password: dto.password,
+        password: dto.password, // password is hashed in this method.
       }),
     );
 
-    // get all fields that are not default fields
-    const commonFields = dto.commonFields.filter((d) => d.id);
-    const bulkDto: MemberCommonField[] = commonFields.map(
+    // save all fields that are not default fields
+    const bulkDto: MemberCommonField[] = dto.commonFields.map(
       (commonField) =>
         new MemberCommonField({
           ...commonField,
-          organizationMemberId: organizationMember.id,
+          memberId: organizationMember.id,
           organizationId: this.organizationId,
         }),
     );
 
     await this.memberCommonFieldService.createMany(bulkDto);
+
+    const currentDt = DateTime.now();
+    const endDt = currentDt.plus(
+      Duration.fromObject({
+        [membershipPlan.renewalDuration]: membershipPlan.renewalDurationCount,
+      }),
+    );
+
+    this.subscriptionService.createOne({
+      organizationId: this.organizationId,
+      memberId: organizationMember.id,
+      membershipPlanId: membershipPlan.id,
+      status: SubscriptionStatus.Pending,
+      currentPeriodStart: currentDt.toJSDate(),
+      currentPeriodEnd: endDt.toJSDate(),
+      cancelAtPeriodEnd: true,
+      defaultPaymentMethod: membershipPlan.paymentMethod,
+    });
+
     await organizationMember.reload();
     return organizationMember;
   }

@@ -30,8 +30,8 @@ export class MemberCommonFieldService extends SharedService<MemberCommonField> {
       sortableColumns: [
         'id',
         'organizationId',
-        'organizationMemberId',
-        'organizationMember.user.firstName',
+        'memberId',
+        'member.user.firstName',
       ],
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {

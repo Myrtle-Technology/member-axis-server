@@ -13,32 +13,25 @@ import {
 } from 'typeorm';
 
 @Entity()
-@Unique('organizationMember_commonField', [
-  'organizationMemberId',
-  'commonFieldId',
-])
+@Unique('member_commonField', ['memberId', 'commonFieldId'])
 export class MemberCommonField extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   organizationId: number;
-  @ManyToOne(() => Organization, (m) => m.commonFields, {
-    eager: true,
-  })
+  @ManyToOne(() => Organization, (m) => m.commonFields)
   @JoinColumn({ name: 'organizationId' })
   @ApiProperty({ type: () => Organization })
   organization: Organization;
 
   @Column()
-  organizationMemberId: number;
+  memberId: number;
 
-  @ManyToOne(() => OrganizationMember, (m) => m.commonFields, {
-    eager: true,
-  })
-  @JoinColumn({ name: 'organizationMemberId' })
+  @ManyToOne(() => OrganizationMember, (m) => m.commonFields)
+  @JoinColumn({ name: 'memberId' })
   @ApiProperty({ type: () => OrganizationMember })
-  organizationMember: OrganizationMember;
+  member: OrganizationMember;
 
   @Column()
   commonFieldId: number;

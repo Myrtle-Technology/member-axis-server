@@ -1,5 +1,5 @@
 import { IsString, IsOptional, MaxLength, MinLength } from 'class-validator';
-import { MemberCommonField } from 'src/member-common-field/entities/member-common-field.entity';
+import { CreateMemberCommonFieldDto } from 'src/member-common-field/dto/create-member-common-field.dto';
 import { IsUsername } from '../decorators/is-username.decorator';
 
 export class RegisterOrganizationMember {
@@ -17,5 +17,5 @@ export class RegisterOrganizationMember {
   @MaxLength(20)
   password: string;
   membershipPlanId: number;
-  commonFields: MemberCommonField[];
+  commonFields: CreateMemberCommonFieldDto[];
 }

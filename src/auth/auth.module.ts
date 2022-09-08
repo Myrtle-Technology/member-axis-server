@@ -15,6 +15,7 @@ import { SmsModule } from 'src/sms/sms.module';
 import { ConfigModule } from '@nestjs/config';
 import { MemberCommonFieldModule } from 'src/member-common-field/member-common-field.module';
 import { MembershipPlanModule } from 'src/membership-plan/membership-plan.module';
+import { SubscriptionModule } from 'src/subscription/subscription.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { MembershipPlanModule } from 'src/membership-plan/membership-plan.module
     OrganizationMemberModule,
     MemberCommonFieldModule,
     MembershipPlanModule,
+    SubscriptionModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, LocalStrategy],
